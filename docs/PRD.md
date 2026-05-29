@@ -61,7 +61,7 @@ Fokus MVP adalah:
 
 | Komponen | Fungsi |
 |---|---|
-| Laravel 10.x | Framework backend utama |
+| Laravel 10.x | Framework backend utama |  
 | PHP 8.x | Bahasa pemrograman backend |
 | REST API | Komunikasi antara ESP32, frontend, dan backend |
 | Laravel Eloquent ORM | Pengelolaan query database |
