@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\V1;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\VehicleEntry;
+use App\Models\AuditLog;
 
 class VehicleEntryController extends Controller
 {
@@ -28,6 +29,22 @@ class VehicleEntryController extends Controller
         // soft delete not enabled; perform delete
         $entry = VehicleEntry::findOrFail($id);
         $entry->delete();
+
+        AuditLog::create([
+            'user_id' => request()->user()->id,
+            'action' => 'delete',
+            'module' => 'vehicle_entry',
+            'description' => "Soft deleted vehicle entry {$entry->id}.",
+            'ip_address' => request()->ip(),
+            'user_agent' => request()->userAgent(),
+            'status' => 'success',
+            'metadata' => [
+                'entry_id' => $entry->id,
+                'location_id' => $entry->location_id,
+                'sensor_id' => $entry->sensor_id,
+            ],
+        ]);
+
         return response()->json(['message' => 'Entry deleted']);
     }
 }

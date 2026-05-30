@@ -26,6 +26,7 @@ class AuditLog extends Model
 
     protected $casts = [
         'metadata' => 'array',
+        'created_at' => 'datetime',
     ];
 
     public function user()

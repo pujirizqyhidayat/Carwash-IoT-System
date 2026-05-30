@@ -30,12 +30,12 @@ Route::prefix('v1')->group(function () {
         Route::post('login', [AuthController::class, 'login']);
     });
 
-    Route::prefix('iot')->group(function () {
+    Route::prefix('iot')->middleware('device.key')->group(function () {
         Route::post('vehicle-detections', [IoTController::class, 'vehicleDetections']);
         Route::post('sensors/heartbeat', [IoTController::class, 'heartbeat']);
     });
 
-    Route::middleware('auth:sanctum')->group(function () {
+    Route::middleware(['auth:sanctum', 'role:owner,cashier,admin'])->group(function () {
         Route::prefix('auth')->group(function () {
             Route::post('logout', [AuthController::class, 'logout']);
             Route::get('me', [AuthController::class, 'me']);
@@ -44,7 +44,7 @@ Route::prefix('v1')->group(function () {
         Route::prefix('dashboard')->group(function () {
             Route::get('summary', [DashboardController::class, 'summary']);
             Route::get('recent-activities', [DashboardController::class, 'recentActivities']);
-            Route::get('chart', [DashboardController::class, 'chart']);
+            Route::get('chart', [DashboardController::class, 'chart'])->middleware('role:owner,admin');
         });
 
         Route::prefix('monitoring')->group(function () {
@@ -52,27 +52,30 @@ Route::prefix('v1')->group(function () {
             Route::get('hourly', [MonitoringController::class, 'hourly']);
         });
 
-        Route::apiResource('sensors', SensorController::class);
+        Route::apiResource('sensors', SensorController::class)->only(['index', 'show'])->middleware('role:owner,admin');
+        Route::apiResource('sensors', SensorController::class)->only(['store', 'update', 'destroy'])->middleware('role:admin');
         Route::get('sensors/{id}/status', [SensorController::class, 'status']);
 
-        Route::apiResource('users', UserController::class);
-        Route::post('users/{id}/reset-password', [UserController::class, 'resetPassword']);
+        Route::apiResource('users', UserController::class)->middleware('role:admin');
+        Route::post('users/{id}/reset-password', [UserController::class, 'resetPassword'])->middleware('role:admin');
 
-        Route::apiResource('locations', LocationController::class);
+        Route::apiResource('locations', LocationController::class)->only(['index', 'show'])->middleware('role:owner,admin');
+        Route::apiResource('locations', LocationController::class)->only(['store', 'update', 'destroy'])->middleware('role:admin');
 
-        Route::apiResource('vehicle-entries', VehicleEntryController::class)->only(['index', 'show', 'destroy']);
+        Route::apiResource('vehicle-entries', VehicleEntryController::class)->only(['index', 'show'])->middleware('role:owner,admin');
+        Route::delete('vehicle-entries/{vehicle_entry}', [VehicleEntryController::class, 'destroy'])->middleware('role:admin');
 
-        Route::prefix('reports')->group(function () {
+        Route::prefix('reports')->middleware('role:owner,admin')->group(function () {
             Route::get('/', [ReportController::class, 'index']);
             Route::post('generate-daily', [ReportController::class, 'generateDaily']);
             Route::get('export/pdf', [ReportController::class, 'exportPdf']);
             Route::get('export/excel', [ReportController::class, 'exportExcel']);
         });
 
-        Route::prefix('audit-logs')->group(function () {
+        Route::prefix('audit-logs')->middleware('role:admin')->group(function () {
             Route::get('/', [AuditLogController::class, 'index']);
-            Route::get('{id}', [AuditLogController::class, 'show']);
             Route::get('export', [AuditLogController::class, 'export']);
+            Route::get('{id}', [AuditLogController::class, 'show']);
         });
     });
 });

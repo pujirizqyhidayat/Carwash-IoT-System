@@ -13,6 +13,8 @@
     "format": "oxfmt src/"
   },
   "dependencies": {
+    "@headlessui/vue": "^1.7.23",
+    "@lucide/vue": "^1.17.0",
     "@tailwindcss/vite": "^4.3.0",
     "axios": "^1.16.0",
     "pinia": "^3.0.4",

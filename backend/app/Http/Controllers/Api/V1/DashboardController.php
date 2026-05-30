@@ -4,8 +4,8 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use App\Models\VehicleEntry;
 use App\Models\UltrasonicSensor;
+use App\Models\VehicleEntry;
 use Carbon\Carbon;
 
 class DashboardController extends Controller
@@ -18,24 +18,28 @@ class DashboardController extends Controller
 
         $vehiclesToday = VehicleEntry::where('location_id', $locationId)
             ->whereDate('entry_time', $today)
-            ->count();
+            ->sum('vehicle_count');
 
         $startOfWeek = now()->startOfWeek();
         $startOfMonth = now()->startOfMonth();
 
         $vehiclesThisWeek = VehicleEntry::where('location_id', $locationId)
             ->where('entry_time', '>=', $startOfWeek)
-            ->count();
+            ->sum('vehicle_count');
 
         $vehiclesThisMonth = VehicleEntry::where('location_id', $locationId)
             ->where('entry_time', '>=', $startOfMonth)
-            ->count();
+            ->sum('vehicle_count');
+
+        $sensorStatus = UltrasonicSensor::where('location_id', $locationId)
+            ->orderByRaw("case status when 'disconnected' then 0 when 'inactive' then 1 else 2 end")
+            ->value('status') ?? 'disconnected';
 
         return response()->json([
             'vehicles_today' => $vehiclesToday,
             'vehicles_this_week' => $vehiclesThisWeek,
             'vehicles_this_month' => $vehiclesThisMonth,
-            'sensor_status' => 'active',
+            'sensor_status' => $sensorStatus,
             'last_updated' => now()->toDateTimeString(),
         ]);
     }
@@ -75,7 +79,7 @@ class DashboardController extends Controller
                 $end = Carbon::parse("$date $h:59:59");
                 $count = VehicleEntry::where('location_id', $locationId)
                     ->whereBetween('entry_time', [$start, $end])
-                    ->count();
+                    ->sum('vehicle_count');
                 $data[] = ['label' => $hourLabel, 'value' => $count];
             }
         } else {
@@ -99,7 +103,7 @@ class DashboardController extends Controller
             foreach ($labels as $label) {
                 $count = VehicleEntry::where('location_id', $locationId)
                     ->whereDate('entry_time', $label)
-                    ->count();
+                    ->sum('vehicle_count');
                 $data[] = ['label' => $label, 'value' => $count];
             }
         }

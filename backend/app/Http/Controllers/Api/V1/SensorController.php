@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\V1;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\UltrasonicSensor;
+use App\Models\AuditLog;
 
 class SensorController extends Controller
 {
@@ -27,6 +28,18 @@ class SensorController extends Controller
         ]);
 
         $sensor = UltrasonicSensor::create($data + ['status' => 'active']);
+
+        AuditLog::create([
+            'user_id' => $request->user()->id,
+            'action' => 'create',
+            'module' => 'sensor',
+            'description' => "Created sensor {$sensor->sensor_code}.",
+            'ip_address' => $request->ip(),
+            'user_agent' => $request->userAgent(),
+            'status' => 'success',
+            'metadata' => ['sensor_id' => $sensor->id],
+        ]);
+
         return response()->json($sensor, 201);
     }
 
@@ -40,6 +53,18 @@ class SensorController extends Controller
             'threshold_distance' => 'nullable|numeric',
         ]);
         $sensor->update($data);
+
+        AuditLog::create([
+            'user_id' => $request->user()->id,
+            'action' => 'update',
+            'module' => 'sensor',
+            'description' => "Updated sensor {$sensor->sensor_code}.",
+            'ip_address' => $request->ip(),
+            'user_agent' => $request->userAgent(),
+            'status' => 'success',
+            'metadata' => ['sensor_id' => $sensor->id, 'changes' => array_keys($data)],
+        ]);
+
         return response()->json($sensor);
     }
 
@@ -63,6 +88,18 @@ class SensorController extends Controller
     {
         $sensor = UltrasonicSensor::findOrFail($id);
         $sensor->update(['status' => 'inactive']);
+
+        AuditLog::create([
+            'user_id' => request()->user()->id,
+            'action' => 'delete',
+            'module' => 'sensor',
+            'description' => "Deactivated sensor {$sensor->sensor_code}.",
+            'ip_address' => request()->ip(),
+            'user_agent' => request()->userAgent(),
+            'status' => 'success',
+            'metadata' => ['sensor_id' => $sensor->id],
+        ]);
+
         return response()->json(['message' => 'Sensor deactivated']);
     }
 }

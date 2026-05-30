@@ -1,0 +1,43 @@
+# Carwash IoT System auditd rules
+#
+# Copy to:
+#   /etc/audit/rules.d/carwash.rules
+#
+# Then reload:
+#   sudo augenrules --load
+#   sudo systemctl restart auditd
+
+# Project source and runtime paths.
+# Adjust these paths to match the production server deployment directory.
+-w /var/www/carwash/backend/.env -p wa -k carwash_env
+-w /var/www/carwash/backend/storage/logs -p wa -k carwash_laravel_logs
+-w /var/www/carwash/backend/bootstrap/cache -p wa -k carwash_bootstrap_cache
+-w /var/www/carwash/backend/public -p wa -k carwash_public
+
+# Web server config, useful when the Laravel API is behind Nginx.
+-w /etc/nginx/sites-available -p wa -k carwash_nginx_config
+-w /etc/nginx/sites-enabled -p wa -k carwash_nginx_config
+
+# SSH and privileged access.
+-w /etc/ssh/sshd_config -p wa -k sshd_config
+-w /etc/sudoers -p wa -k sudoers
+-w /etc/sudoers.d -p wa -k sudoers
+
+# User and group changes.
+-w /etc/passwd -p wa -k identity
+-w /etc/group -p wa -k identity
+-w /etc/shadow -p wa -k identity
+-w /etc/gshadow -p wa -k identity
+
+# Audit auditd changes too.
+-w /etc/audit/auditd.conf -p wa -k auditd_config
+-w /etc/audit/rules.d -p wa -k auditd_rules
+
+# Capture permission and ownership changes under the application directory.
+-a always,exit -F arch=b64 -S chmod,fchmod,fchmodat,chown,fchown,fchownat,lchown -F dir=/var/www/carwash -k carwash_permissions
+-a always,exit -F arch=b32 -S chmod,fchmod,fchmodat,chown,fchown,fchownat,lchown -F dir=/var/www/carwash -k carwash_permissions
+
+# Capture process execution inside deployment directory.
+# This helps trace manual artisan/composer/npm actions on the server.
+-a always,exit -F arch=b64 -S execve -F dir=/var/www/carwash -k carwash_exec
+-a always,exit -F arch=b32 -S execve -F dir=/var/www/carwash -k carwash_exec

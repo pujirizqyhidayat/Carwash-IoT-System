@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\V1;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\ParkingLocation;
+use App\Models\AuditLog;
 
 class LocationController extends Controller
 {
@@ -22,6 +23,18 @@ class LocationController extends Controller
             'capacity' => 'nullable|integer',
         ]);
         $loc = ParkingLocation::create($data);
+
+        AuditLog::create([
+            'user_id' => $request->user()->id,
+            'action' => 'create',
+            'module' => 'location',
+            'description' => "Created location {$loc->location_name}.",
+            'ip_address' => $request->ip(),
+            'user_agent' => $request->userAgent(),
+            'status' => 'success',
+            'metadata' => ['location_id' => $loc->id],
+        ]);
+
         return response()->json($loc, 201);
     }
 
@@ -34,6 +47,18 @@ class LocationController extends Controller
             'capacity' => 'nullable|integer',
         ]);
         $loc->update($data);
+
+        AuditLog::create([
+            'user_id' => $request->user()->id,
+            'action' => 'update',
+            'module' => 'location',
+            'description' => "Updated location {$loc->location_name}.",
+            'ip_address' => $request->ip(),
+            'user_agent' => $request->userAgent(),
+            'status' => 'success',
+            'metadata' => ['location_id' => $loc->id, 'changes' => array_keys($data)],
+        ]);
+
         return response()->json($loc);
     }
 
@@ -46,6 +71,18 @@ class LocationController extends Controller
     {
         $loc = ParkingLocation::findOrFail($id);
         $loc->delete();
+
+        AuditLog::create([
+            'user_id' => request()->user()->id,
+            'action' => 'delete',
+            'module' => 'location',
+            'description' => "Soft deleted location {$loc->location_name}.",
+            'ip_address' => request()->ip(),
+            'user_agent' => request()->userAgent(),
+            'status' => 'success',
+            'metadata' => ['location_id' => $loc->id],
+        ]);
+
         return response()->json(['message' => 'Location deleted']);
     }
 }

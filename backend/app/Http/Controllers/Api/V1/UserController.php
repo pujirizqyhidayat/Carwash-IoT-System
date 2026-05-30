@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\V1;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\User;
+use App\Models\AuditLog;
 use Illuminate\Support\Facades\Hash;
 
 class UserController extends Controller
@@ -26,6 +27,18 @@ class UserController extends Controller
 
         $data['password'] = Hash::make($data['password']);
         $user = User::create($data);
+
+        AuditLog::create([
+            'user_id' => $request->user()->id,
+            'action' => 'create',
+            'module' => 'user',
+            'description' => "Created user {$user->username}.",
+            'ip_address' => $request->ip(),
+            'user_agent' => $request->userAgent(),
+            'status' => 'success',
+            'metadata' => ['target_user_id' => $user->id, 'role' => $user->role],
+        ]);
+
         return response()->json($user, 201);
     }
 
@@ -38,6 +51,18 @@ class UserController extends Controller
             'status' => 'sometimes|in:active,inactive',
         ]);
         $user->update($data);
+
+        AuditLog::create([
+            'user_id' => $request->user()->id,
+            'action' => 'update',
+            'module' => 'user',
+            'description' => "Updated user {$user->username}.",
+            'ip_address' => $request->ip(),
+            'user_agent' => $request->userAgent(),
+            'status' => 'success',
+            'metadata' => ['target_user_id' => $user->id, 'changes' => array_keys($data)],
+        ]);
+
         return response()->json($user);
     }
 
@@ -52,6 +77,18 @@ class UserController extends Controller
         $user = User::findOrFail($id);
         $user->password = Hash::make($data['new_password']);
         $user->save();
+
+        AuditLog::create([
+            'user_id' => $request->user()->id,
+            'action' => 'update',
+            'module' => 'user',
+            'description' => "Reset password for user {$user->username}.",
+            'ip_address' => $request->ip(),
+            'user_agent' => $request->userAgent(),
+            'status' => 'success',
+            'metadata' => ['target_user_id' => $user->id],
+        ]);
+
         return response()->json(['message' => 'Password reset']);
     }
 
@@ -59,6 +96,18 @@ class UserController extends Controller
     {
         $user = User::findOrFail($id);
         $user->update(['status' => 'inactive']);
+
+        AuditLog::create([
+            'user_id' => request()->user()->id,
+            'action' => 'delete',
+            'module' => 'user',
+            'description' => "Deactivated user {$user->username}.",
+            'ip_address' => request()->ip(),
+            'user_agent' => request()->userAgent(),
+            'status' => 'success',
+            'metadata' => ['target_user_id' => $user->id],
+        ]);
+
         return response()->json(['message' => 'User deactivated']);
     }
 }

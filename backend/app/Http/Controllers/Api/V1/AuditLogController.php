@@ -3,8 +3,10 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
+use App\Exports\AuditLogExport;
 use Illuminate\Http\Request;
 use App\Models\AuditLog;
+use Maatwebsite\Excel\Facades\Excel;
 
 class AuditLogController extends Controller
 {
@@ -25,6 +27,32 @@ class AuditLogController extends Controller
 
     public function export(Request $request)
     {
-        return response()->json(['message' => 'Export audit logs not implemented']);
+        $data = $request->validate([
+            'module' => 'nullable|string',
+            'action' => 'nullable|string',
+            'start_date' => 'nullable|date',
+            'end_date' => 'nullable|date|after_or_equal:start_date',
+        ]);
+
+        AuditLog::create([
+            'user_id' => $request->user()->id,
+            'action' => 'export',
+            'module' => 'audit_log',
+            'description' => 'Exported audit logs to Excel.',
+            'ip_address' => $request->ip(),
+            'user_agent' => $request->userAgent(),
+            'status' => 'success',
+            'metadata' => $data,
+        ]);
+
+        return Excel::download(
+            new AuditLogExport(
+                $data['module'] ?? null,
+                $data['action'] ?? null,
+                $data['start_date'] ?? null,
+                $data['end_date'] ?? null
+            ),
+            'audit-logs-'.now()->format('Ymd-His').'.xlsx'
+        );
     }
 }
