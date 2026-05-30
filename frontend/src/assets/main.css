@@ -43,6 +43,15 @@
       inset 0 1px 0 rgba(255, 255, 255, 0.1);
   }
 
+  .scrollbar-hidden {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .scrollbar-hidden::-webkit-scrollbar {
+    display: none;
+  }
+
   .nav-item {
     @apply flex h-11 items-center gap-3 rounded-full px-4 text-sm font-medium text-blue-100/75 transition hover:bg-white/10 hover:text-white;
   }

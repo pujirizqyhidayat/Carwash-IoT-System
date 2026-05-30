@@ -25,7 +25,7 @@
         </div>
       </div>
 
-      <nav class="flex-1 space-y-1.5 px-4 py-4">
+      <nav class="scrollbar-hidden min-h-0 flex-1 space-y-1.5 overflow-y-auto px-4 py-4">
         <RouterLink
           v-for="item in visibleNav"
           :key="item.to"
@@ -38,7 +38,7 @@
         </RouterLink>
       </nav>
 
-      <div class="p-4">
+      <div class="shrink-0 p-4">
         <div class="mb-3 rounded-[1.4rem] border border-white/10 bg-white/10 p-3 backdrop-blur">
           <div class="flex items-center gap-3">
             <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white text-sm font-bold text-blue-700">
@@ -84,17 +84,23 @@
           </div>
         </div>
         <div v-if="mobileOpen" class="border-t border-slate-200 bg-white/95 p-3 lg:hidden">
-          <RouterLink
-            v-for="item in visibleNav"
-            :key="item.to"
-            :to="item.to"
-            class="nav-item"
-            active-class="nav-item-active"
-            @click="mobileOpen = false"
-          >
-            <component :is="item.icon" :size="18" />
-            <span>{{ item.label }}</span>
-          </RouterLink>
+          <div class="space-y-1.5">
+            <RouterLink
+              v-for="item in visibleNav"
+              :key="item.to"
+              :to="item.to"
+              class="nav-item"
+              active-class="nav-item-active"
+              @click="mobileOpen = false"
+            >
+              <component :is="item.icon" :size="18" />
+              <span>{{ item.label }}</span>
+            </RouterLink>
+          </div>
+          <button class="mt-3 inline-flex h-11 w-full items-center justify-center gap-2 rounded-full border border-red-100 bg-red-50 px-4 text-sm font-semibold text-red-600 transition hover:bg-red-600 hover:text-white" type="button" @click="logout">
+            <LogOut :size="17" />
+            Logout
+          </button>
         </div>
       </header>
 

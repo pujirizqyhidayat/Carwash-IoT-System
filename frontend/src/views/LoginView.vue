@@ -45,10 +45,6 @@
             </button>
           </form>
 
-          <div class="mt-6 rounded-lg border border-blue-100 bg-blue-50/80 p-4 text-sm text-blue-900">
-            <p class="font-semibold">Demo account</p>
-            <p class="mt-1">admin@carwash.test / password123</p>
-          </div>
         </div>
       </section>
 
@@ -106,8 +102,8 @@ const router = useRouter()
 const auth = useAuthStore()
 const error = ref('')
 const form = reactive({
-  email: 'admin@carwash.test',
-  password: 'password123',
+  email: '',
+  password: '',
 })
 
 async function submit() {
