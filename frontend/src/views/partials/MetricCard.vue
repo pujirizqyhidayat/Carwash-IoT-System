@@ -1,13 +1,13 @@
 <template>
   <section class="card-elevated group relative overflow-hidden p-5">
-    <div class="absolute inset-x-0 top-0 h-1 bg-blue-600"></div>
+    <div class="absolute inset-x-0 top-0 h-1 bg-blue-500"></div>
     <div class="flex items-start justify-between gap-3">
       <div>
-        <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">{{ label }}</p>
-        <p class="mt-3 text-3xl font-bold text-slate-950">{{ value }}</p>
-        <p class="mt-1 text-sm text-slate-500">{{ sublabel }}</p>
+        <p class="text-xs font-semibold uppercase tracking-wide text-blue-100/55">{{ label }}</p>
+        <p class="mt-3 text-3xl font-bold text-white">{{ value }}</p>
+        <p class="mt-1 text-sm text-blue-100/50">{{ sublabel }}</p>
       </div>
-      <div class="flex h-11 w-11 items-center justify-center rounded-lg bg-blue-50 text-blue-700 ring-1 ring-blue-100 transition group-hover:bg-blue-600 group-hover:text-white">
+      <div class="flex h-11 w-11 items-center justify-center rounded-lg bg-blue-500/15 text-blue-100 ring-1 ring-blue-300/20 transition group-hover:bg-blue-500/25 group-hover:text-white">
         <component :is="icon" :size="21" />
       </div>
     </div>
