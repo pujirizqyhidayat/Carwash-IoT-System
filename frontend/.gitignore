@@ -39,6 +39,6 @@ __screenshots__/
 *.timestamp-*-*.mjs
 
 # Docs
-docs/*
-deploy/*
+/docs/*
+/deploy/*
 scripts/*
