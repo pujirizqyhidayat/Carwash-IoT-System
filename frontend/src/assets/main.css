@@ -8,8 +8,8 @@
   body {
     margin: 0;
     min-width: 320px;
-    background: #f6f9fc;
-    color: #0f172a;
+    background: #0b1b3f;
+    color: #e8efff;
     font-family:
       Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   }
@@ -24,23 +24,35 @@
 @layer components {
   .app-shell {
     background:
-      linear-gradient(rgba(37, 99, 235, 0.035) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(37, 99, 235, 0.035) 1px, transparent 1px),
-      #f6f9fc;
-    background-size: 28px 28px;
+      linear-gradient(145deg, rgba(60, 108, 238, 0.36), transparent 44%),
+      linear-gradient(215deg, rgba(43, 180, 226, 0.24), transparent 46%),
+      linear-gradient(rgba(147, 197, 253, 0.09) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(147, 197, 253, 0.09) 1px, transparent 1px),
+      linear-gradient(180deg, rgba(10, 25, 58, 0.52), rgba(6, 13, 32, 0.96)),
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='260' height='260' viewBox='0 0 260 260'%3E%3Cg fill='%23ffffff' fill-opacity='.42'%3E%3Ccircle cx='22' cy='34' r='1'/%3E%3Ccircle cx='94' cy='18' r='.7'/%3E%3Ccircle cx='172' cy='43' r='.9'/%3E%3Ccircle cx='230' cy='88' r='.65'/%3E%3Ccircle cx='44' cy='166' r='.8'/%3E%3Ccircle cx='132' cy='138' r='.6'/%3E%3Ccircle cx='210' cy='204' r='1'/%3E%3Ccircle cx='72' cy='236' r='.55'/%3E%3C/g%3E%3Cpath d='M0 214c42-24 75-26 119-11 38 13 73 13 141-19v76H0z' fill='%23030a1c' fill-opacity='.62'/%3E%3Cpath d='M0 238c52-20 91-18 139-5 38 11 78 10 121-5v32H0z' fill='%23020914' fill-opacity='.82'/%3E%3C/svg%3E");
+    background-attachment: fixed;
+    background-size:
+      auto,
+      auto,
+      auto,
+      36px 36px,
+      36px 36px,
+      auto,
+      cover;
   }
 
   .sidebar-panel {
-    background: #07346f;
+    background: rgba(6, 13, 35, 0.78);
     background-image:
-      radial-gradient(circle at 22% 12%, rgba(125, 211, 252, 0.2), transparent 30%),
-      linear-gradient(180deg, rgba(37, 99, 235, 0.24), transparent 42%);
+      linear-gradient(145deg, rgba(65, 111, 255, 0.24), transparent 46%),
+      linear-gradient(180deg, rgba(47, 87, 201, 0.28), rgba(8, 14, 39, 0.1) 48%);
     background-size:
       auto,
       auto;
     box-shadow:
-      0 24px 70px rgba(8, 47, 99, 0.28),
-      inset 0 1px 0 rgba(255, 255, 255, 0.1);
+      0 28px 80px rgba(0, 0, 0, 0.48),
+      inset 0 1px 0 rgba(255, 255, 255, 0.12);
+    backdrop-filter: blur(26px);
   }
 
   .scrollbar-hidden {
@@ -57,53 +69,151 @@
   }
 
   .nav-item-active {
-    @apply bg-white/95 text-blue-700 shadow-lg shadow-blue-950/10 hover:bg-white hover:text-blue-700;
+    @apply bg-blue-500/25 text-white shadow-lg shadow-blue-500/25 hover:bg-blue-500/30 hover:text-white;
   }
 
   .card {
-    @apply rounded-lg border border-slate-200/80 bg-white shadow-sm shadow-slate-200/70 transition;
+    @apply rounded-lg border border-cyan-300/15 bg-slate-950/55 shadow-sm shadow-blue-950/40 transition;
+    border-radius: 4px;
+    backdrop-filter: blur(22px);
   }
 
   .card-elevated {
-    @apply rounded-lg border border-slate-200/80 bg-white shadow-lg shadow-slate-200/70;
+    @apply rounded-lg border border-cyan-300/15 bg-slate-950/60 shadow-lg shadow-blue-950/50;
+    border-radius: 4px;
+    backdrop-filter: blur(24px);
+  }
+
+  .robot-panel {
+    position: relative;
+    overflow: hidden;
+    border: 1px solid rgba(147, 197, 253, 0.24);
+    border-radius: 8px;
+    background:
+      linear-gradient(135deg, rgba(34, 53, 101, 0.86), rgba(8, 18, 43, 0.92)),
+      linear-gradient(90deg, rgba(96, 165, 250, 0.14), transparent);
+    box-shadow:
+      0 30px 80px rgba(0, 0, 0, 0.42),
+      0 0 42px rgba(37, 99, 235, 0.12),
+      inset 0 1px 0 rgba(255, 255, 255, 0.11),
+      inset 0 0 0 1px rgba(59, 130, 246, 0.08);
+    backdrop-filter: blur(24px);
+  }
+
+  .robot-panel > * {
+    position: relative;
+    z-index: 1;
+  }
+
+  .robot-panel::before,
+  .robot-panel::after {
+    content: "";
+    position: absolute;
+    pointer-events: none;
+  }
+
+  .robot-panel::before {
+    inset: 0;
+    background: linear-gradient(rgba(255, 255, 255, 0.045) 1px, transparent 1px);
+    background-size: 100% 8px;
+    opacity: 0.22;
+    mix-blend-mode: screen;
+  }
+
+  .robot-panel::after {
+    left: 18px;
+    right: 18px;
+    top: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, #93c5fd, #67e8f9, transparent);
+  }
+
+  .robot-copy {
+    font-family: "Cascadia Mono", "Fira Code", Consolas, ui-monospace, monospace;
+    letter-spacing: 0.08em;
+  }
+
+  .robot-input {
+    @apply h-12 w-full border border-blue-100/70 bg-blue-50/95 px-4 text-sm text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-cyan-300 focus:ring-4 focus:ring-cyan-400/20;
+    border-radius: 7px;
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.78),
+      0 12px 28px rgba(1, 10, 30, 0.16);
+  }
+
+  .robot-button {
+    @apply inline-flex h-12 items-center justify-center gap-2 bg-blue-600 px-4 text-sm font-bold text-white shadow-lg shadow-blue-600/30 transition disabled:cursor-not-allowed disabled:bg-blue-300;
+    border-radius: 7px;
+    background-image: linear-gradient(135deg, #2563eb, #1d4ed8 54%, #0891b2);
+  }
+
+  .robot-button:hover {
+    transform: translateY(-1px);
+    box-shadow:
+      0 16px 34px rgba(37, 99, 235, 0.34),
+      0 0 0 1px rgba(125, 211, 252, 0.18);
+  }
+
+  .robot-tile {
+    @apply border border-cyan-300/18 bg-white/8 p-4;
+    border-radius: 8px;
+    box-shadow:
+      inset 0 0 24px rgba(37, 99, 235, 0.09),
+      0 12px 30px rgba(1, 10, 30, 0.16);
+  }
+
+  .command-surface {
+    background:
+      linear-gradient(rgba(255, 255, 255, 0.2) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255, 255, 255, 0.16) 1px, transparent 1px),
+      linear-gradient(135deg, #6aa5ff 0%, #4f83ee 48%, #2e5fd2 100%);
+    background-size:
+      28px 28px,
+      28px 28px,
+      auto;
   }
 
   .dashboard-banner {
-    @apply overflow-hidden rounded-lg border border-blue-100 bg-white shadow-sm shadow-blue-100/50;
+    @apply overflow-hidden rounded-lg border border-white/10 bg-slate-950/55 shadow-2xl shadow-blue-950/40;
     background-image:
-      linear-gradient(90deg, rgba(37, 99, 235, 0.12), transparent 58%),
-      linear-gradient(135deg, rgba(14, 165, 233, 0.12) 0 1px, transparent 1px);
+      linear-gradient(90deg, rgba(37, 99, 235, 0.26), transparent 62%),
+      linear-gradient(135deg, rgba(125, 211, 252, 0.08) 0 1px, transparent 1px);
     background-size:
       auto,
       20px 20px;
+    backdrop-filter: blur(24px);
   }
 
   .section-title {
-    @apply text-base font-semibold text-slate-950;
+    @apply text-base font-semibold text-white;
   }
 
   .muted {
-    @apply text-sm text-slate-500;
+    @apply text-sm text-blue-100/55;
   }
 
   .btn-primary {
-    @apply inline-flex h-10 items-center gap-2 rounded-lg bg-blue-600 px-4 text-sm font-semibold text-white shadow-sm shadow-blue-200 transition hover:bg-blue-700 hover:shadow-md disabled:cursor-not-allowed disabled:bg-blue-300;
+    @apply inline-flex h-10 items-center gap-2 rounded-lg bg-blue-600 px-4 text-sm font-semibold text-white shadow-lg shadow-blue-600/25 transition hover:bg-blue-500 hover:shadow-blue-500/40 disabled:cursor-not-allowed disabled:bg-blue-300;
+    border-radius: 2px;
   }
 
   .btn-outline {
-    @apply inline-flex h-10 items-center gap-2 rounded-lg border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-700 shadow-sm shadow-slate-100 transition hover:border-blue-200 hover:bg-blue-50 hover:text-blue-700 disabled:cursor-not-allowed disabled:text-slate-400;
+    @apply inline-flex h-10 items-center gap-2 rounded-lg border border-white/10 bg-white/10 px-4 text-sm font-semibold text-blue-50 shadow-sm shadow-blue-950/20 transition hover:border-blue-300/40 hover:bg-blue-500/20 hover:text-white disabled:cursor-not-allowed disabled:text-slate-400;
+    border-radius: 2px;
   }
 
   .icon-btn {
-    @apply inline-flex h-10 w-10 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 transition hover:border-blue-200 hover:bg-blue-50 hover:text-blue-700;
+    @apply inline-flex h-10 w-10 items-center justify-center rounded-lg border border-white/10 bg-white/10 text-blue-50 transition hover:border-blue-300/40 hover:bg-blue-500/20 hover:text-white;
+    border-radius: 2px;
   }
 
   .input {
-    @apply h-10 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-100;
+    @apply h-10 w-full rounded-lg border border-white/10 bg-white/10 px-3 text-sm text-white outline-none transition placeholder:text-blue-100/35 focus:border-blue-400 focus:ring-4 focus:ring-blue-500/20;
+    border-radius: 2px;
   }
 
   .label {
-    @apply mb-1.5 block text-xs font-semibold uppercase tracking-wide text-slate-500;
+    @apply mb-1.5 block text-xs font-semibold uppercase tracking-wide text-blue-100/60;
   }
 
   .status-pill {
@@ -111,11 +221,11 @@
   }
 
   .table-head {
-    @apply bg-blue-50/70 text-left text-xs font-semibold uppercase tracking-wide text-slate-500;
+    @apply bg-white/5 text-left text-xs font-semibold uppercase tracking-wide text-blue-100/55;
   }
 
   .table-cell {
-    @apply border-t border-slate-100 px-4 py-3 text-sm text-slate-700;
+    @apply border-t border-white/10 px-4 py-3 text-sm text-blue-50/80;
   }
 
   .mini-grid {
@@ -124,4 +234,93 @@
       linear-gradient(90deg, rgba(255, 255, 255, 0.18) 1px, transparent 1px);
     background-size: 22px 22px;
   }
+}
+
+.app-shell :is(.text-slate-950, .text-slate-900, .text-slate-800, .text-slate-700) {
+  color: #f4f8ff;
+}
+
+.app-shell :is(.text-slate-600, .text-slate-500, .text-slate-400) {
+  color: rgba(205, 221, 255, 0.62);
+}
+
+.app-shell :is(.text-blue-700, .text-blue-600, .text-blue-500) {
+  color: #8fb7ff;
+}
+
+.app-shell :is(.text-emerald-700, .text-emerald-600) {
+  color: #8af0bf;
+}
+
+.app-shell :is(.bg-white, .bg-slate-50, .bg-blue-50, .bg-emerald-50, .bg-amber-50) {
+  background-color: rgba(255, 255, 255, 0.08);
+}
+
+.app-shell :is(.border-slate-200, .border-slate-100, .border-blue-100) {
+  border-color: rgba(255, 255, 255, 0.11);
+}
+
+.app-shell :is(.bg-blue-600, .bg-blue-700) {
+  background-color: #315dff;
+}
+
+.app-shell .divide-slate-100 > :not([hidden]) ~ :not([hidden]) {
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.app-shell .shadow-slate-200\/60,
+.app-shell .shadow-slate-200\/70,
+.app-shell .shadow-blue-100\/50,
+.app-shell .shadow-blue-200 {
+  --tw-shadow-color: rgba(0, 0, 0, 0.45);
+}
+
+.workspace-shell {
+  background:
+    linear-gradient(145deg, rgba(83, 140, 255, 0.26), transparent 42%),
+    linear-gradient(215deg, rgba(103, 232, 249, 0.15), transparent 44%),
+    linear-gradient(rgba(147, 197, 253, 0.08) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(147, 197, 253, 0.08) 1px, transparent 1px),
+    linear-gradient(180deg, #173468 0%, #102653 46%, #0d1d43 100%);
+  background-attachment: fixed;
+  background-size:
+    auto,
+    auto,
+    38px 38px,
+    38px 38px,
+    auto;
+}
+
+.workspace-shell .sidebar-panel {
+  background: rgba(8, 18, 44, 0.82);
+}
+
+.workspace-shell header {
+  background: rgba(23, 48, 96, 0.74);
+  border-color: rgba(191, 219, 254, 0.18);
+  box-shadow: 0 20px 55px rgba(4, 12, 31, 0.26);
+}
+
+.workspace-shell .card,
+.workspace-shell .card-elevated {
+  background: rgba(20, 43, 88, 0.66);
+  border-color: rgba(191, 219, 254, 0.18);
+  box-shadow:
+    0 18px 50px rgba(4, 12, 31, 0.22),
+    inset 0 1px 0 rgba(255, 255, 255, 0.09);
+}
+
+.workspace-shell .dashboard-banner {
+  background:
+    linear-gradient(90deg, rgba(59, 130, 246, 0.3), rgba(14, 165, 233, 0.1) 60%, transparent),
+    rgba(25, 55, 110, 0.72);
+  border-color: rgba(191, 219, 254, 0.2);
+  box-shadow: 0 20px 60px rgba(4, 12, 31, 0.24);
+}
+
+.workspace-shell .btn-outline,
+.workspace-shell .icon-btn,
+.workspace-shell .input {
+  background-color: rgba(255, 255, 255, 0.12);
+  border-color: rgba(219, 234, 254, 0.2);
 }
