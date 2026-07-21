@@ -1,9 +1,9 @@
 <template>
   <div class="app-shell workspace-shell min-h-screen text-blue-50">
-    <aside class="sidebar-panel fixed bottom-4 left-4 top-4 z-30 hidden w-72 overflow-hidden rounded-[2rem] border border-white/10 text-white lg:flex lg:flex-col">
+    <aside class="sidebar-panel fixed bottom-4 left-4 top-4 z-30 hidden w-72 overflow-hidden rounded-lg border border-white/10 text-white lg:flex lg:flex-col">
       <div class="px-5 pb-5 pt-6">
-        <div class="flex items-center gap-3 rounded-[1.6rem] border border-white/10 bg-white/[0.08] px-4 py-3 backdrop-blur">
-          <div class="grid h-11 w-11 place-items-center border border-cyan-300/20 bg-cyan-400/10 text-cyan-100 shadow-lg shadow-cyan-500/20">
+        <div class="flex items-center gap-3 rounded-lg border border-white/10 bg-white/[0.08] px-4 py-3 backdrop-blur">
+          <div class="grid h-11 w-11 place-items-center rounded-md border border-cyan-300/20 bg-cyan-400/10 text-cyan-100 shadow-lg shadow-cyan-500/20">
             <Car :size="22" />
           </div>
           <div>
@@ -13,13 +13,13 @@
         </div>
       </div>
 
-      <div class="mx-5 mb-2 rounded-[1.4rem] border border-white/10 bg-white/[0.06] px-4 py-3">
+      <div class="mx-5 mb-2 rounded-lg border border-white/10 bg-white/[0.06] px-4 py-3">
         <div class="flex items-center justify-between">
           <div>
             <p class="text-xs text-blue-100/65">Current location</p>
             <p class="mt-1 truncate text-sm font-semibold text-white">{{ locations.activeLocation?.location_name || 'Select location' }}</p>
           </div>
-          <div class="flex h-9 w-9 items-center justify-center rounded-full bg-blue-500/20 text-blue-100">
+          <div class="flex h-9 w-9 items-center justify-center rounded-md bg-blue-500/20 text-blue-100">
             <MapPinned :size="17" />
           </div>
         </div>
@@ -39,9 +39,9 @@
       </nav>
 
       <div class="shrink-0 p-4">
-        <div class="mb-3 rounded-[1.4rem] border border-white/10 bg-white/[0.06] p-3 backdrop-blur">
+        <div class="mb-3 rounded-lg border border-white/10 bg-white/[0.06] p-3 backdrop-blur">
           <div class="flex items-center gap-3">
-            <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-blue-500/25 text-sm font-bold text-white ring-1 ring-blue-300/25">
+            <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-blue-500/25 text-sm font-bold text-white ring-1 ring-blue-300/25">
               {{ userInitials }}
             </div>
             <div class="min-w-0">
@@ -51,7 +51,7 @@
           </div>
         </div>
         <button
-          class="inline-flex h-11 w-full items-center justify-center gap-2 rounded-full border border-red-200/40 bg-red-500/15 px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-white hover:text-red-600"
+          class="inline-flex h-11 w-full items-center justify-center gap-2 rounded-lg border border-red-200/40 bg-red-500/15 px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-white hover:text-red-600"
           type="button"
           @click="logout"
         >
@@ -62,7 +62,7 @@
     </aside>
 
     <div class="lg:pl-80">
-      <header class="sticky top-4 z-20 mx-4 mt-4 rounded-[1.75rem] border border-white/10 bg-slate-950/55 shadow-2xl shadow-blue-950/50 backdrop-blur-xl sm:mx-6 lg:mx-8">
+      <header class="sticky top-4 z-20 mx-4 mt-4 rounded-lg border border-white/10 bg-slate-950/55 shadow-2xl shadow-blue-950/50 backdrop-blur-xl sm:mx-6 lg:mx-8">
         <div class="flex h-16 items-center justify-between gap-4 px-5 sm:px-6">
           <div class="min-w-0">
             <p class="robot-copy text-xs font-medium uppercase text-cyan-200/70">{{ eyebrow }}</p>
@@ -97,7 +97,7 @@
               <span>{{ item.label }}</span>
             </RouterLink>
           </div>
-          <button class="mt-3 inline-flex h-11 w-full items-center justify-center gap-2 rounded-full border border-red-300/20 bg-red-500/15 px-4 text-sm font-semibold text-red-100 transition hover:bg-red-500/25 hover:text-white" type="button" @click="logout">
+          <button class="mt-3 inline-flex h-11 w-full items-center justify-center gap-2 rounded-lg border border-red-300/20 bg-red-500/15 px-4 text-sm font-semibold text-red-100 transition hover:bg-red-500/25 hover:text-white" type="button" @click="logout">
             <LogOut :size="17" />
             Logout
           </button>

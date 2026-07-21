@@ -1,5 +1,17 @@
 @import "tailwindcss";
 
+:root {
+  --color-primary: #3b82f6;
+  --color-primary-deep: #2563eb;
+  --color-secondary: #94a3b8;
+  --color-tertiary: #e0f2fe;
+  --color-neutral: #f8fafc;
+  --color-ink: #0f172a;
+  --color-panel: rgba(255, 255, 255, 0.86);
+  --radius-panel: 8px;
+  --radius-control: 6px;
+}
+
 @layer base {
   * {
     box-sizing: border-box;
@@ -8,8 +20,8 @@
   body {
     margin: 0;
     min-width: 320px;
-    background: #0b1b3f;
-    color: #e8efff;
+    background: var(--color-neutral);
+    color: var(--color-ink);
     font-family:
       Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   }
@@ -19,16 +31,29 @@
   select {
     font: inherit;
   }
+
+  button,
+  [role="button"],
+  a,
+  select,
+  summary {
+    cursor: pointer;
+  }
+
+  button:disabled,
+  [aria-disabled="true"] {
+    cursor: not-allowed;
+  }
 }
 
 @layer components {
   .app-shell {
     background:
-      linear-gradient(145deg, rgba(60, 108, 238, 0.36), transparent 44%),
-      linear-gradient(215deg, rgba(43, 180, 226, 0.24), transparent 46%),
-      linear-gradient(rgba(147, 197, 253, 0.09) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(147, 197, 253, 0.09) 1px, transparent 1px),
-      linear-gradient(180deg, rgba(10, 25, 58, 0.52), rgba(6, 13, 32, 0.96)),
+      linear-gradient(145deg, rgba(59, 130, 246, 0.16), transparent 44%),
+      linear-gradient(215deg, rgba(224, 242, 254, 0.82), transparent 46%),
+      linear-gradient(rgba(59, 130, 246, 0.08) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(59, 130, 246, 0.08) 1px, transparent 1px),
+      linear-gradient(180deg, rgba(248, 250, 252, 0.94), rgba(224, 242, 254, 0.88)),
       url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='260' height='260' viewBox='0 0 260 260'%3E%3Cg fill='%23ffffff' fill-opacity='.42'%3E%3Ccircle cx='22' cy='34' r='1'/%3E%3Ccircle cx='94' cy='18' r='.7'/%3E%3Ccircle cx='172' cy='43' r='.9'/%3E%3Ccircle cx='230' cy='88' r='.65'/%3E%3Ccircle cx='44' cy='166' r='.8'/%3E%3Ccircle cx='132' cy='138' r='.6'/%3E%3Ccircle cx='210' cy='204' r='1'/%3E%3Ccircle cx='72' cy='236' r='.55'/%3E%3C/g%3E%3Cpath d='M0 214c42-24 75-26 119-11 38 13 73 13 141-19v76H0z' fill='%23030a1c' fill-opacity='.62'/%3E%3Cpath d='M0 238c52-20 91-18 139-5 38 11 78 10 121-5v32H0z' fill='%23020914' fill-opacity='.82'/%3E%3C/svg%3E");
     background-attachment: fixed;
     background-size:
@@ -42,15 +67,15 @@
   }
 
   .sidebar-panel {
-    background: rgba(6, 13, 35, 0.78);
+    background: rgba(37, 99, 235, 0.92);
     background-image:
-      linear-gradient(145deg, rgba(65, 111, 255, 0.24), transparent 46%),
-      linear-gradient(180deg, rgba(47, 87, 201, 0.28), rgba(8, 14, 39, 0.1) 48%);
+      linear-gradient(145deg, rgba(224, 242, 254, 0.22), transparent 46%),
+      linear-gradient(180deg, rgba(59, 130, 246, 0.18), rgba(15, 23, 42, 0.2) 62%);
     background-size:
       auto,
       auto;
     box-shadow:
-      0 28px 80px rgba(0, 0, 0, 0.48),
+      0 28px 80px rgba(37, 99, 235, 0.26),
       inset 0 1px 0 rgba(255, 255, 255, 0.12);
     backdrop-filter: blur(26px);
   }
@@ -65,36 +90,43 @@
   }
 
   .nav-item {
-    @apply flex h-11 items-center gap-3 rounded-full px-4 text-sm font-medium text-blue-100/75 transition hover:bg-white/10 hover:text-white;
+    @apply flex h-11 items-center gap-3 px-4 text-sm font-medium text-blue-100/75 transition hover:bg-white/10 hover:text-white;
+    border-radius: var(--radius-control);
   }
 
   .nav-item-active {
-    @apply bg-blue-500/25 text-white shadow-lg shadow-blue-500/25 hover:bg-blue-500/30 hover:text-white;
+    @apply bg-white/20 text-white shadow-lg shadow-blue-500/25 hover:bg-white/25 hover:text-white;
   }
 
   .card {
-    @apply rounded-lg border border-cyan-300/15 bg-slate-950/55 shadow-sm shadow-blue-950/40 transition;
-    border-radius: 4px;
+    @apply rounded-lg border shadow-sm transition;
+    border-radius: var(--radius-panel);
+    border-color: rgba(148, 163, 184, 0.24);
+    background: var(--color-panel);
+    box-shadow: 0 18px 50px rgba(59, 130, 246, 0.08);
     backdrop-filter: blur(22px);
   }
 
   .card-elevated {
-    @apply rounded-lg border border-cyan-300/15 bg-slate-950/60 shadow-lg shadow-blue-950/50;
-    border-radius: 4px;
+    @apply rounded-lg border shadow-lg;
+    border-radius: var(--radius-panel);
+    border-color: rgba(148, 163, 184, 0.26);
+    background: rgba(255, 255, 255, 0.92);
+    box-shadow: 0 22px 56px rgba(59, 130, 246, 0.1);
     backdrop-filter: blur(24px);
   }
 
   .robot-panel {
     position: relative;
     overflow: hidden;
-    border: 1px solid rgba(147, 197, 253, 0.24);
-    border-radius: 8px;
+    border: 1px solid rgba(59, 130, 246, 0.24);
+    border-radius: var(--radius-panel);
     background:
-      linear-gradient(135deg, rgba(34, 53, 101, 0.86), rgba(8, 18, 43, 0.92)),
-      linear-gradient(90deg, rgba(96, 165, 250, 0.14), transparent);
+      linear-gradient(135deg, rgba(248, 250, 252, 0.92), rgba(224, 242, 254, 0.92)),
+      linear-gradient(90deg, rgba(59, 130, 246, 0.14), transparent);
     box-shadow:
-      0 30px 80px rgba(0, 0, 0, 0.42),
-      0 0 42px rgba(37, 99, 235, 0.12),
+      0 30px 80px rgba(59, 130, 246, 0.12),
+      0 0 42px rgba(59, 130, 246, 0.12),
       inset 0 1px 0 rgba(255, 255, 255, 0.11),
       inset 0 0 0 1px rgba(59, 130, 246, 0.08);
     backdrop-filter: blur(24px);
@@ -125,7 +157,7 @@
     right: 18px;
     top: 0;
     height: 2px;
-    background: linear-gradient(90deg, transparent, #93c5fd, #67e8f9, transparent);
+    background: linear-gradient(90deg, transparent, var(--color-primary), var(--color-tertiary), transparent);
   }
 
   .robot-copy {
@@ -134,39 +166,45 @@
   }
 
   .robot-input {
-    @apply h-12 w-full border border-blue-100/70 bg-blue-50/95 px-4 text-sm text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-cyan-300 focus:ring-4 focus:ring-cyan-400/20;
-    border-radius: 7px;
+    @apply h-12 w-full border px-4 text-sm text-slate-950 outline-none transition placeholder:text-slate-400 focus:ring-4;
+    border-radius: var(--radius-control);
+    border-color: rgba(148, 163, 184, 0.38);
+    background: rgba(248, 250, 252, 0.96);
+    --tw-ring-color: rgba(59, 130, 246, 0.16);
     box-shadow:
       inset 0 1px 0 rgba(255, 255, 255, 0.78),
       0 12px 28px rgba(1, 10, 30, 0.16);
   }
 
   .robot-button {
-    @apply inline-flex h-12 items-center justify-center gap-2 bg-blue-600 px-4 text-sm font-bold text-white shadow-lg shadow-blue-600/30 transition disabled:cursor-not-allowed disabled:bg-blue-300;
-    border-radius: 7px;
-    background-image: linear-gradient(135deg, #2563eb, #1d4ed8 54%, #0891b2);
+    @apply inline-flex h-12 items-center justify-center gap-2 px-4 text-sm font-bold text-white shadow-lg transition disabled:cursor-not-allowed disabled:bg-blue-300;
+    border-radius: var(--radius-control);
+    background: var(--color-primary);
+    box-shadow: 0 16px 34px rgba(59, 130, 246, 0.28);
   }
 
   .robot-button:hover {
     transform: translateY(-1px);
     box-shadow:
-      0 16px 34px rgba(37, 99, 235, 0.34),
-      0 0 0 1px rgba(125, 211, 252, 0.18);
+      0 16px 34px rgba(59, 130, 246, 0.34),
+      0 0 0 1px rgba(224, 242, 254, 0.72);
   }
 
   .robot-tile {
-    @apply border border-cyan-300/18 bg-white/8 p-4;
-    border-radius: 8px;
+    @apply border p-4;
+    border-radius: var(--radius-panel);
+    border-color: rgba(59, 130, 246, 0.18);
+    background: rgba(224, 242, 254, 0.54);
     box-shadow:
-      inset 0 0 24px rgba(37, 99, 235, 0.09),
-      0 12px 30px rgba(1, 10, 30, 0.16);
+      inset 0 0 24px rgba(59, 130, 246, 0.09),
+      0 12px 30px rgba(59, 130, 246, 0.1);
   }
 
   .command-surface {
     background:
       linear-gradient(rgba(255, 255, 255, 0.2) 1px, transparent 1px),
       linear-gradient(90deg, rgba(255, 255, 255, 0.16) 1px, transparent 1px),
-      linear-gradient(135deg, #6aa5ff 0%, #4f83ee 48%, #2e5fd2 100%);
+      linear-gradient(135deg, var(--color-tertiary) 0%, var(--color-primary) 54%, var(--color-primary-deep) 100%);
     background-size:
       28px 28px,
       28px 28px,
@@ -174,10 +212,13 @@
   }
 
   .dashboard-banner {
-    @apply overflow-hidden rounded-lg border border-white/10 bg-slate-950/55 shadow-2xl shadow-blue-950/40;
+    @apply overflow-hidden rounded-lg border shadow-2xl;
+    border-radius: var(--radius-panel);
+    border-color: rgba(59, 130, 246, 0.18);
+    background-color: rgba(255, 255, 255, 0.9);
     background-image:
-      linear-gradient(90deg, rgba(37, 99, 235, 0.26), transparent 62%),
-      linear-gradient(135deg, rgba(125, 211, 252, 0.08) 0 1px, transparent 1px);
+      linear-gradient(90deg, rgba(59, 130, 246, 0.18), transparent 62%),
+      linear-gradient(135deg, rgba(224, 242, 254, 0.5) 0 1px, transparent 1px);
     background-size:
       auto,
       20px 20px;
@@ -185,47 +226,67 @@
   }
 
   .section-title {
-    @apply text-base font-semibold text-white;
+    @apply text-base font-semibold;
+    color: var(--color-ink);
   }
 
   .muted {
-    @apply text-sm text-blue-100/55;
+    @apply text-sm;
+    color: var(--color-secondary);
   }
 
   .btn-primary {
-    @apply inline-flex h-10 items-center gap-2 rounded-lg bg-blue-600 px-4 text-sm font-semibold text-white shadow-lg shadow-blue-600/25 transition hover:bg-blue-500 hover:shadow-blue-500/40 disabled:cursor-not-allowed disabled:bg-blue-300;
-    border-radius: 2px;
+    @apply inline-flex h-10 items-center gap-2 rounded-lg px-4 text-sm font-semibold text-white shadow-lg transition disabled:cursor-not-allowed disabled:bg-blue-300;
+    border-radius: var(--radius-control);
+    background: var(--color-primary);
+    box-shadow: 0 14px 28px rgba(59, 130, 246, 0.24);
   }
 
   .btn-outline {
-    @apply inline-flex h-10 items-center gap-2 rounded-lg border border-white/10 bg-white/10 px-4 text-sm font-semibold text-blue-50 shadow-sm shadow-blue-950/20 transition hover:border-blue-300/40 hover:bg-blue-500/20 hover:text-white disabled:cursor-not-allowed disabled:text-slate-400;
-    border-radius: 2px;
+    @apply inline-flex h-10 items-center gap-2 rounded-lg border px-4 text-sm font-semibold shadow-sm transition disabled:cursor-not-allowed disabled:text-slate-400;
+    border-radius: var(--radius-control);
+    border-color: rgba(148, 163, 184, 0.28);
+    background: rgba(248, 250, 252, 0.74);
+    color: var(--color-primary-deep);
   }
 
   .icon-btn {
-    @apply inline-flex h-10 w-10 items-center justify-center rounded-lg border border-white/10 bg-white/10 text-blue-50 transition hover:border-blue-300/40 hover:bg-blue-500/20 hover:text-white;
-    border-radius: 2px;
+    @apply inline-flex h-10 w-10 items-center justify-center rounded-lg border transition;
+    border-radius: var(--radius-control);
+    border-color: rgba(148, 163, 184, 0.28);
+    background: rgba(248, 250, 252, 0.74);
+    color: var(--color-primary-deep);
   }
 
   .input {
-    @apply h-10 w-full rounded-lg border border-white/10 bg-white/10 px-3 text-sm text-white outline-none transition placeholder:text-blue-100/35 focus:border-blue-400 focus:ring-4 focus:ring-blue-500/20;
-    border-radius: 2px;
+    @apply h-10 w-full rounded-lg border px-3 text-sm outline-none transition placeholder:text-slate-400 focus:ring-4;
+    border-radius: var(--radius-control);
+    border-color: rgba(148, 163, 184, 0.28);
+    background: rgba(248, 250, 252, 0.86);
+    color: var(--color-ink);
+    --tw-ring-color: rgba(59, 130, 246, 0.16);
   }
 
   .label {
-    @apply mb-1.5 block text-xs font-semibold uppercase tracking-wide text-blue-100/60;
+    @apply mb-1.5 block text-xs font-semibold uppercase tracking-wide;
+    color: var(--color-secondary);
   }
 
   .status-pill {
-    @apply inline-flex h-8 items-center gap-2 rounded-full border px-3 text-xs font-semibold;
+    @apply inline-flex h-8 items-center gap-2 border px-3 text-xs font-semibold;
+    border-radius: var(--radius-control);
   }
 
   .table-head {
-    @apply bg-white/5 text-left text-xs font-semibold uppercase tracking-wide text-blue-100/55;
+    @apply text-left text-xs font-semibold uppercase tracking-wide;
+    background: rgba(224, 242, 254, 0.54);
+    color: var(--color-secondary);
   }
 
   .table-cell {
-    @apply border-t border-white/10 px-4 py-3 text-sm text-blue-50/80;
+    @apply border-t px-4 py-3 text-sm;
+    border-color: rgba(148, 163, 184, 0.2);
+    color: var(--color-ink);
   }
 
   .mini-grid {
@@ -237,15 +298,15 @@
 }
 
 .app-shell :is(.text-slate-950, .text-slate-900, .text-slate-800, .text-slate-700) {
-  color: #f4f8ff;
+  color: var(--color-ink);
 }
 
 .app-shell :is(.text-slate-600, .text-slate-500, .text-slate-400) {
-  color: rgba(205, 221, 255, 0.62);
+  color: var(--color-secondary);
 }
 
 .app-shell :is(.text-blue-700, .text-blue-600, .text-blue-500) {
-  color: #8fb7ff;
+  color: var(--color-primary);
 }
 
 .app-shell :is(.text-emerald-700, .text-emerald-600) {
@@ -253,15 +314,15 @@
 }
 
 .app-shell :is(.bg-white, .bg-slate-50, .bg-blue-50, .bg-emerald-50, .bg-amber-50) {
-  background-color: rgba(255, 255, 255, 0.08);
+  background-color: rgba(248, 250, 252, 0.86);
 }
 
 .app-shell :is(.border-slate-200, .border-slate-100, .border-blue-100) {
-  border-color: rgba(255, 255, 255, 0.11);
+  border-color: rgba(148, 163, 184, 0.24);
 }
 
 .app-shell :is(.bg-blue-600, .bg-blue-700) {
-  background-color: #315dff;
+  background-color: var(--color-primary);
 }
 
 .app-shell .divide-slate-100 > :not([hidden]) ~ :not([hidden]) {
@@ -277,11 +338,11 @@
 
 .workspace-shell {
   background:
-    linear-gradient(145deg, rgba(83, 140, 255, 0.26), transparent 42%),
-    linear-gradient(215deg, rgba(103, 232, 249, 0.15), transparent 44%),
-    linear-gradient(rgba(147, 197, 253, 0.08) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(147, 197, 253, 0.08) 1px, transparent 1px),
-    linear-gradient(180deg, #173468 0%, #102653 46%, #0d1d43 100%);
+    linear-gradient(145deg, rgba(59, 130, 246, 0.18), transparent 42%),
+    linear-gradient(215deg, rgba(224, 242, 254, 0.76), transparent 44%),
+    linear-gradient(rgba(59, 130, 246, 0.08) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(59, 130, 246, 0.08) 1px, transparent 1px),
+    linear-gradient(180deg, var(--color-neutral) 0%, var(--color-tertiary) 100%);
   background-attachment: fixed;
   background-size:
     auto,
@@ -292,35 +353,68 @@
 }
 
 .workspace-shell .sidebar-panel {
-  background: rgba(8, 18, 44, 0.82);
+  background: rgba(37, 99, 235, 0.94);
 }
 
 .workspace-shell header {
-  background: rgba(23, 48, 96, 0.74);
-  border-color: rgba(191, 219, 254, 0.18);
-  box-shadow: 0 20px 55px rgba(4, 12, 31, 0.26);
+  background: rgba(255, 255, 255, 0.88);
+  border-color: rgba(148, 163, 184, 0.24);
+  box-shadow: 0 20px 55px rgba(59, 130, 246, 0.1);
 }
 
 .workspace-shell .card,
 .workspace-shell .card-elevated {
-  background: rgba(20, 43, 88, 0.66);
-  border-color: rgba(191, 219, 254, 0.18);
+  background: rgba(255, 255, 255, 0.9);
+  border-color: rgba(148, 163, 184, 0.24);
   box-shadow:
-    0 18px 50px rgba(4, 12, 31, 0.22),
-    inset 0 1px 0 rgba(255, 255, 255, 0.09);
+    0 18px 50px rgba(59, 130, 246, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.7);
 }
 
 .workspace-shell .dashboard-banner {
   background:
-    linear-gradient(90deg, rgba(59, 130, 246, 0.3), rgba(14, 165, 233, 0.1) 60%, transparent),
-    rgba(25, 55, 110, 0.72);
-  border-color: rgba(191, 219, 254, 0.2);
-  box-shadow: 0 20px 60px rgba(4, 12, 31, 0.24);
+    linear-gradient(90deg, rgba(59, 130, 246, 0.16), rgba(224, 242, 254, 0.72) 60%, transparent),
+    rgba(255, 255, 255, 0.9);
+  border-color: rgba(59, 130, 246, 0.18);
+  box-shadow: 0 20px 60px rgba(59, 130, 246, 0.1);
 }
 
 .workspace-shell .btn-outline,
 .workspace-shell .icon-btn,
 .workspace-shell .input {
-  background-color: rgba(255, 255, 255, 0.12);
-  border-color: rgba(219, 234, 254, 0.2);
+  background-color: rgba(248, 250, 252, 0.9);
+  border-color: rgba(148, 163, 184, 0.28);
+  color: var(--color-ink);
+}
+
+.workspace-shell select.input,
+.workspace-shell select.input option,
+.workspace-shell input.input,
+.workspace-shell textarea.input {
+  background-color: #ffffff;
+  color: var(--color-ink);
+}
+
+.workspace-shell select.input {
+  color-scheme: light;
+}
+
+.workspace-shell :is(.card, .card-elevated, .dashboard-banner, header) {
+  color: var(--color-ink);
+}
+
+.workspace-shell :is(.card, .card-elevated, .dashboard-banner) :is(.text-white, .text-blue-50, .text-blue-100, .text-blue-200, .text-emerald-200) {
+  color: var(--color-ink);
+}
+
+.workspace-shell :is(.card, .card-elevated, .dashboard-banner, header) :is(.text-blue-100\/55, .text-blue-100\/50, .text-blue-100\/70, .text-blue-200\/70, .text-blue-50\/80, .text-slate-500, .text-slate-400) {
+  color: var(--color-secondary);
+}
+
+.workspace-shell header :is(.text-white, .text-blue-50, .text-blue-100, .text-cyan-200\/70) {
+  color: var(--color-ink);
+}
+
+.workspace-shell .sidebar-panel :is(.text-white, .text-blue-50, .text-blue-100, .text-cyan-100) {
+  color: #ffffff;
 }

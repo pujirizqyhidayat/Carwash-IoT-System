@@ -9,15 +9,15 @@
             <p class="mt-2 text-sm text-blue-100/55">Last synced from backend at {{ lastUpdated || '-' }}</p>
           </div>
           <div class="grid grid-cols-3 gap-3 text-center">
-            <div class="rounded-lg border border-white/10 bg-white/[0.08] px-4 py-3 shadow-lg shadow-blue-950/20">
+            <div class="rounded-lg border border-white/10 bg-white/8 px-4 py-3 shadow-lg shadow-blue-950/20">
               <p class="text-xs text-blue-100/55">Today</p>
               <p class="mt-1 text-xl font-bold text-blue-100">{{ summary.vehicles_today }}</p>
             </div>
-            <div class="rounded-lg border border-white/10 bg-white/[0.08] px-4 py-3 shadow-lg shadow-blue-950/20">
+            <div class="rounded-lg border border-white/10 bg-white/8 px-4 py-3 shadow-lg shadow-blue-950/20">
               <p class="text-xs text-blue-100/55">Week</p>
               <p class="mt-1 text-xl font-bold text-white">{{ summary.vehicles_this_week }}</p>
             </div>
-            <div class="rounded-lg border border-white/10 bg-white/[0.08] px-4 py-3 shadow-lg shadow-blue-950/20">
+            <div class="rounded-lg border border-white/10 bg-white/8 px-4 py-3 shadow-lg shadow-blue-950/20">
               <p class="text-xs text-blue-100/55">Month</p>
               <p class="mt-1 text-xl font-bold text-emerald-200">{{ summary.vehicles_this_month }}</p>
             </div>
@@ -70,7 +70,7 @@
                 <p class="truncate text-sm font-semibold text-white">{{ item.sensor_name || 'Sensor' }}</p>
                 <p class="text-xs text-blue-100/55">{{ item.entry_time }}</p>
               </div>
-              <span class="rounded-full bg-blue-500/15 px-2.5 py-1 text-xs font-bold text-blue-100 ring-1 ring-blue-300/15">
+              <span class="rounded-md bg-blue-500/15 px-2.5 py-1 text-xs font-bold text-blue-100 ring-1 ring-blue-300/15">
                 +{{ item.vehicle_count }}
               </span>
             </div>
