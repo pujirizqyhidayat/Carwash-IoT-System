@@ -1,15 +1,15 @@
 <template>
   <MainLayout title="Locations" eyebrow="Carwash sites">
     <div class="space-y-6">
-      <section v-if="auth.canAccessAdmin" class="card p-5">
-        <div class="grid gap-4 md:grid-cols-5">
-          <input v-model="form.owner_id" class="input" type="number" min="1" placeholder="Owner ID" />
-          <input v-model="form.location_name" class="input md:col-span-2" placeholder="Location name" />
-          <input v-model="form.address" class="input md:col-span-2" placeholder="Address" />
-          <input v-model="form.capacity" class="input" type="number" min="0" placeholder="Capacity" />
-          <button class="btn-primary md:col-span-2" type="button" @click="createLocation">
+      <section class="card p-5">
+        <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h2 class="section-title">Location List</h2>
+            <p class="muted">Manage carwash branches and capacities</p>
+          </div>
+          <button v-if="auth.canAccessAdmin" class="btn-primary justify-center" type="button" @click="addOpen = true">
             <Plus :size="17" />
-            Create Location
+            Add Location
           </button>
         </div>
       </section>
@@ -42,6 +42,34 @@
         </article>
       </section>
     </div>
+
+    <AppModal :open="addOpen" title="Add Location" description="Create a new carwash location." @close="addOpen = false">
+      <div class="grid gap-4 md:grid-cols-2">
+        <div>
+          <label class="label">Owner ID</label>
+          <input v-model="form.owner_id" class="input" type="number" min="1" />
+        </div>
+        <div>
+          <label class="label">Capacity</label>
+          <input v-model="form.capacity" class="input" type="number" min="0" />
+        </div>
+        <div>
+          <label class="label">Location Name</label>
+          <input v-model="form.location_name" class="input" />
+        </div>
+        <div>
+          <label class="label">Address</label>
+          <input v-model="form.address" class="input" />
+        </div>
+      </div>
+      <div class="mt-5 flex justify-end gap-2">
+        <button class="btn-outline" type="button" @click="addOpen = false">Cancel</button>
+        <button class="btn-primary" type="button" @click="createLocation">
+          <Plus :size="17" />
+          Create Location
+        </button>
+      </div>
+    </AppModal>
 
     <AppModal :open="editOpen" title="Edit Location" description="Update carwash location details." @close="editOpen = false">
       <div class="grid gap-4 md:grid-cols-2">
@@ -78,6 +106,7 @@ import { useAuthStore } from '../stores/auth'
 
 const auth = useAuthStore()
 const locations = ref([])
+const addOpen = ref(false)
 const editOpen = ref(false)
 const editId = ref(null)
 const toast = reactive({ message: '', type: 'success' })
@@ -106,6 +135,7 @@ async function createLocation() {
       capacity: Number(form.capacity || 0),
     })
     Object.assign(form, { owner_id: 1, location_name: '', address: '', capacity: 20 })
+    addOpen.value = false
     await fetchLocations()
     showToast('Location created')
   } catch (error) {

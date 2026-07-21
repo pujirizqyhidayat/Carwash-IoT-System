@@ -1,31 +1,22 @@
 <template>
   <MainLayout title="Users" eyebrow="Admin">
     <div class="space-y-6">
-      <section class="card p-5">
-        <div class="grid gap-4 md:grid-cols-6">
-          <input v-model="form.full_name" class="input md:col-span-2" placeholder="Full name" />
-          <input v-model="form.username" class="input" placeholder="Username" />
-          <input v-model="form.email" class="input md:col-span-2" type="email" placeholder="Email" />
-          <select v-model="form.role" class="input">
-            <option value="owner">Owner</option>
-            <option value="cashier">Cashier</option>
-            <option value="admin">Admin</option>
-          </select>
-          <input v-model="form.password" class="input md:col-span-2" type="password" placeholder="Password" />
-          <button class="btn-primary md:col-span-2" type="button" @click="createUser">
-            <UserPlus :size="17" />
-            Create User
-          </button>
-        </div>
-      </section>
-
       <section class="card overflow-hidden">
         <div class="flex items-center justify-between border-b border-slate-200 px-5 py-4">
-          <h2 class="section-title">User Management</h2>
-          <button class="btn-outline" type="button" @click="fetchUsers">
-            <RefreshCw :size="17" />
-            Refresh
-          </button>
+          <div>
+            <h2 class="section-title">User Management</h2>
+            <p class="muted">Create, edit, and deactivate dashboard accounts</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <button class="btn-primary" type="button" @click="addOpen = true">
+              <UserPlus :size="17" />
+              Add User
+            </button>
+            <button class="btn-outline" type="button" @click="fetchUsers">
+              <RefreshCw :size="17" />
+              Refresh
+            </button>
+          </div>
         </div>
         <div class="overflow-x-auto">
           <table class="w-full min-w-[820px]">
@@ -62,6 +53,42 @@
         </div>
       </section>
     </div>
+
+    <AppModal :open="addOpen" title="Add User" description="Create a new dashboard account." @close="addOpen = false">
+      <div class="grid gap-4 md:grid-cols-2">
+        <div>
+          <label class="label">Full Name</label>
+          <input v-model="form.full_name" class="input" />
+        </div>
+        <div>
+          <label class="label">Username</label>
+          <input v-model="form.username" class="input" />
+        </div>
+        <div>
+          <label class="label">Email</label>
+          <input v-model="form.email" class="input" type="email" />
+        </div>
+        <div>
+          <label class="label">Role</label>
+          <select v-model="form.role" class="input">
+            <option value="owner">Owner</option>
+            <option value="cashier">Cashier</option>
+            <option value="admin">Admin</option>
+          </select>
+        </div>
+        <div class="md:col-span-2">
+          <label class="label">Password</label>
+          <input v-model="form.password" class="input" type="password" />
+        </div>
+      </div>
+      <div class="mt-5 flex justify-end gap-2">
+        <button class="btn-outline" type="button" @click="addOpen = false">Cancel</button>
+        <button class="btn-primary" type="button" @click="createUser">
+          <UserPlus :size="17" />
+          Create User
+        </button>
+      </div>
+    </AppModal>
 
     <AppModal :open="editOpen" title="Edit User" description="Update account role and status." @close="editOpen = false">
       <div class="grid gap-4 md:grid-cols-2">
@@ -107,6 +134,7 @@ import MainLayout from '../layouts/mainlayout.vue'
 import { api, extractError } from '../services/api'
 
 const users = ref([])
+const addOpen = ref(false)
 const editOpen = ref(false)
 const editId = ref(null)
 const newPassword = ref('')
@@ -133,6 +161,7 @@ async function createUser() {
   try {
     await api.post('/users', form)
     Object.assign(form, { full_name: '', username: '', email: '', password: 'password123', role: 'cashier' })
+    addOpen.value = false
     await fetchUsers()
     showToast('User created')
   } catch (error) {

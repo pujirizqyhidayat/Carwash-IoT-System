@@ -1,95 +1,89 @@
 <template>
-  <main class="min-h-screen bg-[#071129] text-blue-50">
-    <div class="grid min-h-screen lg:grid-cols-[1.05fr_0.95fr]">
-      <section class="app-shell relative flex items-center justify-center overflow-hidden px-6 py-10">
-        <div class="pointer-events-none absolute left-10 top-10 hidden h-24 w-24 border-l border-t border-cyan-300/25 lg:block"></div>
-        <div class="pointer-events-none absolute bottom-10 right-10 hidden h-24 w-24 border-b border-r border-blue-300/25 lg:block"></div>
-        <div class="robot-panel w-full max-w-md p-7">
-          <div class="mb-8 flex items-center gap-3">
-            <div class="grid h-12 w-12 place-items-center border border-cyan-300/25 bg-cyan-400/10 text-cyan-100 shadow-lg shadow-cyan-500/20">
-              <Cpu :size="24" />
+  <main class="min-h-screen overflow-hidden bg-[#f8fafc] text-slate-950">
+    <section class="relative flex min-h-screen items-center justify-center px-4 py-8 sm:px-6 lg:px-10">
+      <div class="absolute inset-0">
+        <img src="/logincar.avif" alt="" class="h-full w-full object-cover opacity-35" />
+        <div class="absolute inset-0 bg-[#e0f2fe]/82"></div>
+        <div class="absolute inset-0 bg-[radial-gradient(circle_at_20%_18%,rgba(59,130,246,0.28),transparent_34%),radial-gradient(circle_at_82%_72%,rgba(148,163,184,0.22),transparent_28%)]"></div>
+      </div>
+
+      <div class="relative grid w-full max-w-6xl overflow-hidden rounded-lg border border-slate-300/50 bg-white/90 shadow-2xl shadow-blue-500/15 backdrop-blur-xl lg:min-h-[680px] lg:grid-cols-[1.04fr_0.96fr]">
+        <aside class="relative hidden overflow-hidden border-r border-slate-300/40 p-8 lg:block">
+          <img src="/logincar.avif" alt="Car wash login visual" class="absolute inset-0 h-full w-full object-cover" />
+          <div class="absolute inset-0 bg-gradient-to-b from-[#3b82f6]/8 via-[#3b82f6]/28 to-[#0f172a]/84"></div>
+          <div class="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-[#0f172a] to-transparent"></div>
+
+          <div class="relative flex h-full flex-col justify-between">
+            <div class="flex items-center gap-4">
+              <p class="robot-copy text-xs font-semibold uppercase text-blue-50/80">RMODA</p>
+              <div class="h-px flex-1 bg-sky-100/70"></div>
             </div>
-            <div>
-              <p class="text-lg font-bold text-white">Carwash IoT</p>
-              <p class="text-sm text-blue-100/55">Secure Operations Dashboard</p>
+
+            <div class="max-w-md">
+              <h1 class="text-5xl font-black leading-none text-white drop-shadow-2xl">Clean Flow, Smart Control</h1>
+              <p class="mt-5 max-w-sm text-sm leading-6 text-blue-50/78">
+                Secure Dashboard, Secure Operations
+              </p>
             </div>
           </div>
+        </aside>
 
-          <div class="mb-7">
-            <h1 class="text-2xl font-bold text-white">Login</h1>
-            <p class="mt-2 text-sm text-blue-100/55">Secure dashboard access</p>
-          </div>
-
-          <form class="space-y-4" @submit.prevent="submit">
-            <div>
-              <label class="label" for="email">Email</label>
-              <input id="email" v-model="form.email" class="robot-input" type="email" autocomplete="email" required />
-            </div>
-            <div>
-              <label class="label" for="password">Password</label>
-              <input
-                id="password"
-                v-model="form.password"
-                class="robot-input"
-                type="password"
-                autocomplete="current-password"
-                required
-              />
-            </div>
-
-            <p v-if="error" class="rounded-lg border border-red-300/25 bg-red-500/15 px-3 py-2 text-sm font-medium text-red-100">
-              {{ error }}
-            </p>
-
-            <button class="robot-button w-full" type="submit" :disabled="auth.loading">
-              <LogIn :size="18" />
-              {{ auth.loading ? 'Signing in...' : 'Sign in' }}
-            </button>
-          </form>
-
-        </div>
-      </section>
-
-      <section class="command-surface hidden p-8 text-white lg:block">
-        <div class="robot-panel flex h-full flex-col justify-between p-8">
-          <div>
-            <p class="text-sm font-semibold uppercase tracking-wide text-blue-100/70">Rizki Car Wash</p>
-            <h2 class="mt-5 max-w-xl text-5xl font-black leading-tight">Operations Control</h2>
-          </div>
-          <div class="rounded-lg border border-white/25 bg-white/18 p-5 text-blue-50 shadow-xl shadow-blue-950/30 backdrop-blur">
-            <div class="mb-5 flex items-center justify-between">
+        <div class="flex items-center justify-center bg-[#f8fafc] px-6 py-10 text-slate-950 sm:px-10 lg:px-14">
+          <div class="w-full max-w-md">
+            <div class="mb-16 flex items-center justify-center gap-3 text-slate-950 lg:mb-24">
+              <div class="grid h-11 w-11 place-items-center rounded-md bg-blue-600 text-white shadow-lg shadow-blue-600/25">
+                <Cpu :size="22" />
+              </div>
               <div>
-                <p class="text-xs font-semibold uppercase tracking-wide text-blue-200/70">Dashboard</p>
-                <p class="mt-1 text-lg font-bold">Vehicle Flow</p>
-              </div>
-              <span class="bg-emerald-500/15 px-3 py-1 text-xs font-bold text-emerald-100 ring-1 ring-emerald-300/20">Active</span>
-            </div>
-            <div class="grid grid-cols-3 gap-3">
-              <div class="robot-tile">
-                <p class="text-xs text-blue-100/55">Today</p>
-                <p class="mt-2 text-2xl font-black">Live</p>
-              </div>
-              <div class="robot-tile">
-                <p class="text-xs text-blue-100/55">Sensor</p>
-                <p class="mt-2 text-2xl font-black">Online</p>
-              </div>
-              <div class="robot-tile">
-                <p class="text-xs text-amber-100/70">Export</p>
-                <p class="mt-2 text-2xl font-black">PDF</p>
+                <p class="text-base font-bold">Carwash IoT</p>
+                <p class="text-xs font-medium text-slate-500">Operations Dashboard</p>
               </div>
             </div>
-            <div class="mt-5 flex h-28 items-end gap-2">
-              <div class="h-[35%] flex-1 bg-blue-200"></div>
-              <div class="h-[55%] flex-1 bg-blue-300"></div>
-              <div class="h-[72%] flex-1 bg-blue-500"></div>
-              <div class="h-[45%] flex-1 bg-cyan-300"></div>
-              <div class="h-[88%] flex-1 bg-blue-700"></div>
-              <div class="h-[64%] flex-1 bg-emerald-400"></div>
+
+            <div class="mb-8 text-center">
+              <h2 class="text-4xl font-black tracking-normal text-slate-950">Welcome Back</h2>
+              <p class="mt-3 text-sm text-slate-500">Enter your email and password to access your account</p>
             </div>
+
+            <form class="space-y-5" @submit.prevent="submit">
+              <div>
+                <label class="mb-2 block text-sm font-semibold text-slate-800" for="email">Email</label>
+                <input
+                  id="email"
+                  v-model="form.email"
+                  class="h-12 w-full rounded-lg border border-slate-300 bg-white px-4 text-sm text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/15"
+                  type="email"
+                  autocomplete="email"
+                  placeholder="Enter your email"
+                  required
+                />
+              </div>
+              <div>
+                <label class="mb-2 block text-sm font-semibold text-slate-800" for="password">Password</label>
+                <input
+                  id="password"
+                  v-model="form.password"
+                  class="h-12 w-full rounded-lg border border-slate-300 bg-white px-4 text-sm text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/15"
+                  type="password"
+                  autocomplete="current-password"
+                  placeholder="Enter your password"
+                  required
+                />
+              </div>
+
+              <p v-if="error" class="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm font-medium text-red-700">
+                {{ error }}
+              </p>
+
+              <button class="robot-button mt-2 w-full" type="submit" :disabled="auth.loading">
+                <LogIn :size="18" />
+                {{ auth.loading ? 'Signing in...' : 'Sign in' }}
+              </button>
+            </form>
           </div>
         </div>
-      </section>
-    </div>
+      </div>
+    </section>
   </main>
 </template>
 

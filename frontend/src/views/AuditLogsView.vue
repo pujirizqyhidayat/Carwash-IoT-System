@@ -14,7 +14,7 @@
             </button>
             <button class="btn-outline" type="button" @click="exportLogs">
               <FileDown :size="17" />
-              Export
+              Ex000port
             </button>
           </div>
         </div>
@@ -26,7 +26,7 @@
           <p class="muted">Login, CRUD, export, and failed access events</p>
         </div>
         <div class="overflow-x-auto">
-          <table class="w-full min-w-[960px]">
+          <table class="w-full min-w-[240]">
             <thead class="table-head">
               <tr>
                 <th class="px-4 py-3">Time</th>

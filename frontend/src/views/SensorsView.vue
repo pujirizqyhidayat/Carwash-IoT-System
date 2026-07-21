@@ -1,39 +1,22 @@
 <template>
   <MainLayout title="Sensors" eyebrow="Device management" :sensor-status="overallStatus">
     <div class="space-y-6">
-      <section v-if="auth.canAccessAdmin" class="card p-5">
-        <div class="grid gap-4 md:grid-cols-5">
-          <div>
-            <label class="label">Name</label>
-            <input v-model="form.sensor_name" class="input" />
-          </div>
-          <div>
-            <label class="label">Code</label>
-            <input v-model="form.sensor_code" class="input" />
-          </div>
-          <div>
-            <label class="label">Threshold</label>
-            <input v-model="form.threshold_distance" class="input" type="number" min="0" />
-          </div>
-          <div class="flex items-end">
-            <button class="btn-primary w-full justify-center" type="button" @click="createSensor">
-              <Plus :size="17" />
-              Add Sensor
-            </button>
-          </div>
-        </div>
-      </section>
-
       <section class="card overflow-hidden">
         <div class="flex items-center justify-between border-b border-slate-200 px-5 py-4">
           <div>
             <h2 class="section-title">Sensor List</h2>
             <p class="muted">Active, inactive, and disconnected devices</p>
           </div>
-          <button class="btn-outline" type="button" @click="fetchSensors">
-            <RefreshCw :size="17" />
-            Refresh
-          </button>
+          <div class="flex items-center gap-2">
+            <button v-if="auth.canAccessAdmin" class="btn-primary" type="button" @click="addOpen = true">
+              <Plus :size="17" />
+              Add Sensor
+            </button>
+            <button class="btn-outline" type="button" @click="fetchSensors">
+              <RefreshCw :size="17" />
+              Refresh
+            </button>
+          </div>
         </div>
         <div class="overflow-x-auto">
           <table class="w-full min-w-[820px]">
@@ -77,6 +60,37 @@
         </div>
       </section>
     </div>
+
+    <AppModal :open="addOpen" title="Add Sensor" description="Register a new sensor for the active location." @close="addOpen = false">
+      <div class="grid gap-4 md:grid-cols-2">
+        <div>
+          <label class="label">Name</label>
+          <input v-model="form.sensor_name" class="input" />
+        </div>
+        <div>
+          <label class="label">Code</label>
+          <input v-model="form.sensor_code" class="input" />
+        </div>
+        <div>
+          <label class="label">Position</label>
+          <select v-model="form.sensor_position" class="input">
+            <option value="entry">entry</option>
+            <option value="exit">exit</option>
+          </select>
+        </div>
+        <div>
+          <label class="label">Threshold</label>
+          <input v-model="form.threshold_distance" class="input" type="number" min="0" />
+        </div>
+      </div>
+      <div class="mt-5 flex justify-end gap-2">
+        <button class="btn-outline" type="button" @click="addOpen = false">Cancel</button>
+        <button class="btn-primary" type="button" @click="createSensor">
+          <Plus :size="17" />
+          Add Sensor
+        </button>
+      </div>
+    </AppModal>
 
     <AppModal :open="editOpen" title="Edit Sensor" description="Update sensor details and device status." @close="editOpen = false">
       <div class="grid gap-4 md:grid-cols-2">
@@ -126,6 +140,7 @@ import { useLocationStore } from '../stores/location'
 const auth = useAuthStore()
 const locations = useLocationStore()
 const sensors = ref([])
+const addOpen = ref(false)
 const editOpen = ref(false)
 const editId = ref(null)
 const toast = reactive({ message: '', type: 'success' })
@@ -170,6 +185,7 @@ async function createSensor() {
     })
     form.sensor_name = ''
     form.sensor_code = ''
+    addOpen.value = false
     await fetchSensors()
     showToast('Sensor created')
   } catch (error) {
