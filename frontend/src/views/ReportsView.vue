@@ -2,7 +2,7 @@
   <MainLayout title="Reports" eyebrow="Daily summary">
     <div class="space-y-6">
       <section class="card p-5">
-        <div class="grid gap-4 md:grid-cols-3">
+        <div class="grid gap-4 md:grid-cols-[1fr_1fr_auto]">
           <div>
             <label class="label">Start Date</label>
             <input v-model="filters.start_date" class="input" type="date" />
@@ -11,14 +11,10 @@
             <label class="label">End Date</label>
             <input v-model="filters.end_date" class="input" type="date" />
           </div>
-          <div class="flex items-end gap-2">
-            <button class="btn-primary" type="button" @click="fetchReports">
-              <Search :size="17" />
-              Filter
-            </button>
-            <button class="btn-outline" type="button" @click="generateDaily">
+          <div class="flex items-end">
+            <button class="btn-primary whitespace-nowrap" type="button" @click="generateReport">
               <CalendarPlus :size="17" />
-              Generate
+              Generate Report
             </button>
           </div>
         </div>
@@ -72,7 +68,7 @@
 </template>
 
 <script setup>
-import { CalendarPlus, FileDown, Search, Sheet } from '@lucide/vue'
+import { CalendarPlus, FileDown, Sheet } from '@lucide/vue'
 import { onMounted, onUnmounted, reactive, ref } from 'vue'
 import AppToast from '../components/AppToast.vue'
 import MainLayout from '../layouts/mainlayout.vue'
@@ -100,14 +96,14 @@ async function fetchReports() {
   reports.value = data
 }
 
-async function generateDaily() {
+async function generateReport() {
   try {
     await api.post('/reports/generate-daily', {
       location_id: locations.activeLocationId,
       summary_date: filters.end_date || today,
     })
     await fetchReports()
-    showToast('Daily summary generated')
+    showToast('Report generated')
   } catch (error) {
     showToast(extractError(error, 'Failed to generate report'), 'error')
   }
@@ -137,3 +133,4 @@ onUnmounted(() => {
   window.removeEventListener('active-location-changed', fetchReports)
 })
 </script>
+

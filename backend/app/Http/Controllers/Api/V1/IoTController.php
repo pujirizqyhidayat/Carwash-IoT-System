@@ -52,43 +52,8 @@ class IoTController extends Controller
             return response()->json(['message' => 'Duplicate event'], 409);
         }
 
-        $entry = DB::transaction(function () use ($data, $sensor, $request) {
-            $entry = VehicleEntry::create([
-                'location_id' => $data['location_id'],
-                'sensor_id' => $sensor->id,
-                'entry_time' => $data['entry_time'],
-                'vehicle_count' => $data['vehicle_count'],
-                'detection_confidence' => $data['detection_confidence'] ?? null,
-                'raw_distance' => $data['raw_distance'] ?? null,
-                'device_event_id' => $data['device_event_id'],
-            ]);
-
-            if ($request->has('raw_distance')) {
-                SensorRawLog::create([
-                    'sensor_id' => $sensor->id,
-                    'distance_value' => $data['raw_distance'],
-                    'is_detected' => true,
-                    'payload' => $request->all(),
-                    'received_at' => now(),
-                ]);
-            }
-
-            AuditLog::create([
-                'user_id' => null,
-                'action' => 'create',
-                'module' => 'vehicle_entry',
-                'description' => 'Vehicle entry stored from IoT device.',
-                'status' => 'success',
-                'metadata' => [
-                    'entry_id' => $entry->id,
-                    'sensor_code' => $sensor->sensor_code,
-                    'device_event_id' => $data['device_event_id'],
-                ],
-            ]);
-
-            return $entry;
-        });
-
+        $entry = $this->saveVehicleDetection($data);
+       
         $vehiclesToday = VehicleEntry::where('location_id', $data['location_id'])
             ->whereDate('entry_time', now()->toDateString())
             ->sum('vehicle_count');
@@ -99,6 +64,79 @@ class IoTController extends Controller
             'vehicles_today' => $vehiclesToday,
         ]);
     }
+
+    public function saveVehicleDetection(array $data)
+{
+    $sensor = UltrasonicSensor::where('sensor_code', $data['sensor_code'])->first();
+
+    if (!$sensor) {
+        throw new \Exception('Invalid sensor_code');
+    }
+
+    if ((int) $sensor->location_id !== (int) $data['location_id']) {
+        throw new \Exception('Sensor does not belong to location');
+    }
+
+    if ($sensor->status !== 'active') {
+        throw new \Exception('Sensor is not active');
+    }
+
+    if ($sensor->threshold_distance !== null) {
+
+        if (!isset($data['raw_distance'])) {
+            throw new \Exception('raw_distance is required');
+        }
+
+        if ((float) $data['raw_distance'] > (float) $sensor->threshold_distance) {
+            throw new \Exception('raw_distance is outside threshold');
+        }
+    }
+
+    $exists = VehicleEntry::where(
+        'device_event_id',
+        $data['device_event_id']
+    )->exists();
+
+    if ($exists) {
+        throw new \Exception('Duplicate event');
+    }
+
+    return DB::transaction(function () use ($data, $sensor) {
+
+        $entry = VehicleEntry::create([
+            'location_id' => $data['location_id'],
+            'sensor_id' => $sensor->id,
+            'entry_time' => $data['entry_time'],
+            'vehicle_count' => $data['vehicle_count'],
+            'detection_confidence' => $data['detection_confidence'] ?? null,
+            'raw_distance' => $data['raw_distance'] ?? null,
+            'device_event_id' => $data['device_event_id'],
+        ]);
+
+        SensorRawLog::create([
+            'sensor_id' => $sensor->id,
+            'distance_value' => $data['raw_distance'],
+            'is_detected' => true,
+            'payload' => $data,
+            'received_at' => now(),
+        ]);
+
+        AuditLog::create([
+            'user_id' => null,
+            'action' => 'create',
+            'module' => 'vehicle_entry',
+            'description' => 'Vehicle entry stored from MQTT.',
+            'status' => 'success',
+            'metadata' => [
+                'entry_id' => $entry->id,
+                'sensor_code' => $sensor->sensor_code,
+                'device_event_id' => $data['device_event_id'],
+            ],
+        ]);
+
+        return $entry;
+    });
+}
 
     public function heartbeat(Request $request)
     {

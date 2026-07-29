@@ -36,7 +36,7 @@
           <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
             <div>
               <h2 class="text-lg font-bold text-slate-950">Hourly Breakdown</h2>
-              <p class="mt-1 text-sm text-slate-400">Vehicle count per hour — hover a bar for details</p>
+              <p class="mt-1 text-sm text-slate-400">Vehicle count per hour - hover a bar for details</p>
             </div>
             <button
               class="inline-flex h-8 items-center justify-center gap-2 rounded-lg border border-blue-100 bg-blue-50 px-3 text-xs font-semibold text-blue-600 transition hover:border-blue-200 hover:bg-blue-100"
@@ -49,20 +49,20 @@
           </div>
 
           <div class="mt-6">
-            <div class="relative h-40 border-y border-dashed border-slate-200 sm:h-44">
+            <div class="relative h-72 border-y border-dashed border-slate-200 sm:h-80">
               <div class="pointer-events-none absolute inset-x-0 top-1/4 border-t border-dashed border-slate-200"></div>
               <div class="pointer-events-none absolute inset-x-0 top-1/2 border-t border-dashed border-slate-200"></div>
               <div class="pointer-events-none absolute inset-x-0 top-3/4 border-t border-dashed border-slate-200"></div>
 
               <div class="relative flex h-full items-end gap-1.5 pt-2 sm:gap-2">
-                <div v-for="item in chartHours" :key="item.hour" class="group flex min-w-0 flex-1 flex-col items-center">
+                <div v-for="item in chartHours" :key="item.hour" class="group relative flex h-full min-w-0 flex-1 items-end justify-center">
                   <div
-                    class="w-full rounded-t-md transition duration-200 group-hover:opacity-80"
+                    class="relative min-h-0 w-full rounded-t-md transition duration-200 group-hover:opacity-80"
                     :class="barClass(item)"
                     :style="{ height: barHeight(item.total_vehicle) }"
                   >
-                    <div class="pointer-events-none absolute hidden -translate-y-8 rounded-md bg-slate-950 px-2 py-1 text-xs font-semibold text-white shadow-lg group-hover:block">
-                      {{ hourLabel(item.hour) }} · {{ item.total_vehicle }}
+                    <div class="pointer-events-none absolute bottom-full left-1/2 z-10 mb-2 hidden -translate-x-1/2 whitespace-nowrap rounded-md bg-slate-950 px-2 py-1 text-xs font-semibold text-white shadow-lg group-hover:block">
+                      {{ hourLabel(item.hour) }} - {{ item.total_vehicle }}
                     </div>
                   </div>
                 </div>
@@ -94,7 +94,6 @@
               <article v-for="period in periodSummaries" :key="period.label" class="rounded-lg bg-slate-50 p-4">
                 <p class="text-xs font-bold uppercase text-slate-400">{{ period.label }} ({{ period.range }})</p>
                 <p class="mt-2 text-2xl font-bold text-slate-800">{{ period.total }}</p>
-                <p class="mt-1 text-xs text-slate-400">peak at {{ period.peak }}</p>
               </article>
             </div>
           </div>
@@ -116,18 +115,28 @@ const today = ref({ date: '', vehicles_today: 0, sensor_status: 'disconnected' }
 const hourly = ref([])
 let timer = null
 
-const currentHour = new Date().getHours()
+const currentHour = computed(() => new Date().getHours())
 const maxHourly = computed(() => Math.max(...chartHours.value.map((item) => Number(item.total_vehicle || 0)), 1))
 const chartHours = computed(() => {
   const totalsByHour = new Map()
   for (const item of hourly.value) {
-    totalsByHour.set(hourNumber(item.hour), Number(item.total_vehicle || 0))
+    const hour = hourNumber(item.hour ?? item.time ?? item.label ?? item.entry_hour ?? item.created_at)
+    const total = Number(item.total_vehicle ?? item.total_vehicles ?? item.total ?? item.count ?? item.value ?? 0)
+    totalsByHour.set(hour, (totalsByHour.get(hour) || 0) + total)
   }
 
-  return Array.from({ length: 24 }, (_, hour) => ({
+  const hours = Array.from({ length: 24 }, (_, hour) => ({
     hour,
     total_vehicle: totalsByHour.get(hour) || 0,
   }))
+
+  const hourlyTotal = hours.reduce((sum, item) => sum + Number(item.total_vehicle || 0), 0)
+  const todayTotal = Number(today.value.vehicles_today || 0)
+  if (hourlyTotal === 0 && todayTotal > 0) {
+    hours[currentHour.value].total_vehicle = todayTotal
+  }
+
+  return hours
 })
 const peakHours = computed(() =>
   [...chartHours.value]
@@ -163,42 +172,46 @@ function hourLabel(hour) {
 }
 
 function widthFor(value) {
-  return `${Math.max((Number(value || 0) / maxHourly.value) * 100, 4)}%`
+  const total = Number(value || 0)
+  if (total <= 0) return '0%'
+  return `${Math.max((total / maxHourly.value) * 100, 6)}%`
 }
 
 function barHeight(value) {
-  return `${Math.max((Number(value || 0) / maxHourly.value) * 100, 2)}%`
+  const total = Number(value || 0)
+  if (total <= 0) return '2px'
+  return `${Math.max(Math.sqrt(total / maxHourly.value) * 100, 14)}%`
 }
 
 function barClass(item) {
-  if (item.hour === currentHour) return 'bg-blue-600 shadow-lg shadow-blue-500/20'
-  if (item.hour > currentHour) return 'bg-blue-100'
-  return 'bg-blue-300'
+  const total = Number(item.total_vehicle || 0)
+  if (total > 0 && item.hour === currentHour.value) return 'bg-blue-600 shadow-lg shadow-blue-500/20'
+  if (total > 0) return 'bg-blue-500 shadow-sm shadow-blue-500/20'
+  if (item.hour > currentHour.value) return 'bg-blue-100'
+  return 'bg-blue-200'
 }
 
 function summarizePeriod(label, range, startHour, endHour) {
   const entries = chartHours.value.filter((item) => item.hour >= startHour && item.hour < endHour)
   const total = entries.reduce((sum, item) => sum + Number(item.total_vehicle || 0), 0)
-  const peak = entries.reduce((best, item) => (item.total_vehicle > best.total_vehicle ? item : best), {
-    hour: startHour,
-    total_vehicle: 0,
-  })
 
   return {
     label,
     range,
     total,
-    peak: hourLabel(peak.hour),
   }
 }
 
 async function refresh() {
-  const [todayRes, hourlyRes] = await Promise.all([
-    api.get('/monitoring/today', { params: { location_id: locations.activeLocationId } }),
-    api.get('/monitoring/hourly', { params: { location_id: locations.activeLocationId } }),
-  ])
-  today.value = todayRes.data
-  hourly.value = hourlyRes.data
+  const { data: todayData } = await api.get('/monitoring/today', {
+    params: { location_id: locations.activeLocationId },
+  })
+  today.value = todayData
+
+  const { data: hourlyData } = await api.get('/monitoring/hourly', {
+    params: { location_id: locations.activeLocationId, date: today.value.date },
+  })
+  hourly.value = hourlyData
 }
 
 onMounted(() => {
@@ -213,3 +226,13 @@ onUnmounted(() => {
   window.removeEventListener('active-location-changed', refresh)
 })
 </script>
+
+
+
+
+
+
+
+
+
+
