@@ -25,7 +25,6 @@
                 <th class="px-4 py-3">Sensor</th>
                 <th class="px-4 py-3">Code</th>
                 <th class="px-4 py-3">Position</th>
-                <th class="px-4 py-3">Threshold</th>
                 <th class="px-4 py-3">Status</th>
                 <th class="px-4 py-3">Last Seen</th>
                 <th v-if="auth.canAccessAdmin" class="px-4 py-3"></th>
@@ -36,7 +35,6 @@
                 <td class="table-cell font-semibold">{{ sensor.sensor_name }}</td>
                 <td class="table-cell font-mono">{{ sensor.sensor_code }}</td>
                 <td class="table-cell">{{ sensor.sensor_position }}</td>
-                <td class="table-cell">{{ sensor.threshold_distance || '-' }}</td>
                 <td class="table-cell">
                   <span class="status-pill" :class="pillClass(sensor.status)">
                     <span class="h-2 w-2 rounded-full" :class="dotClass(sensor.status)"></span>
@@ -77,10 +75,6 @@
             <option value="entry">entry</option>
             <option value="exit">exit</option>
           </select>
-        </div>
-        <div>
-          <label class="label">Threshold</label>
-          <input v-model="form.threshold_distance" class="input" type="number" min="0" />
         </div>
       </div>
       <div class="mt-5 flex justify-end gap-2">
@@ -242,3 +236,5 @@ onUnmounted(() => {
   window.removeEventListener('active-location-changed', fetchSensors)
 })
 </script>
+
+

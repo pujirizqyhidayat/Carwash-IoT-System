@@ -74,7 +74,7 @@
                 {{ location.location_name }}
               </option>
             </select>
-            <span class="status-pill" :class="sensorClass">
+            <span class="status-pill sensor-status-pill" :class="sensorClass">
               <span class="h-2 w-2 rounded-full" :class="sensorDotClass"></span>
               {{ sensorLabel }}
             </span>
@@ -172,9 +172,9 @@ const sensorLabel = computed(() => {
   return 'Sensor Active'
 })
 const sensorClass = computed(() => {
-  if (props.sensorStatus === 'disconnected') return 'border-red-300/30 bg-red-500/15 text-red-100'
-  if (props.sensorStatus === 'inactive') return 'border-amber-300/30 bg-amber-500/15 text-amber-100'
-  return 'border-emerald-300/30 bg-emerald-500/15 text-emerald-100'
+  if (props.sensorStatus === 'disconnected') return 'border-red-200 bg-red-50 text-red-700'
+  if (props.sensorStatus === 'inactive') return 'border-amber-200 bg-amber-50 text-amber-700'
+  return 'border-emerald-200 bg-emerald-50 text-emerald-700'
 })
 const sensorDotClass = computed(() => {
   if (props.sensorStatus === 'disconnected') return 'bg-red-500'
@@ -196,3 +196,4 @@ onMounted(() => {
   locations.fetchLocations().catch(() => {})
 })
 </script>
+

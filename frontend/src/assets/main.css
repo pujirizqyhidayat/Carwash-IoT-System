@@ -418,3 +418,15 @@
 .workspace-shell .sidebar-panel :is(.text-white, .text-blue-50, .text-blue-100, .text-cyan-100) {
   color: #ffffff;
 }
+
+.workspace-shell header .sensor-status-pill.text-emerald-700 {
+  color: #047857;
+}
+
+.workspace-shell header .sensor-status-pill.text-red-700 {
+  color: #b91c1c;
+}
+
+.workspace-shell header .sensor-status-pill.text-amber-700 {
+  color: #b45309;
+}
