@@ -30,7 +30,6 @@ class UltrasonicSensor extends Model
         'updated_at' => 'datetime',
     ];
 
-    // Relationships
     public function location()
     {
         return $this->belongsTo(ParkingLocation::class, 'location_id');
@@ -44,5 +43,24 @@ class UltrasonicSensor extends Model
     public function sensorRawLogs()
     {
         return $this->hasMany(SensorRawLog::class, 'sensor_id');
+    }
+
+    public function effectiveStatus(): string
+    {
+        if ($this->status === 'active' && (!$this->last_seen_at || $this->last_seen_at->lt(now()->subMinutes(2)))) {
+            return 'disconnected';
+        }
+
+        return $this->status;
+    }
+
+    public static function aggregateStatus($sensors): string
+    {
+        $statuses = collect($sensors)->map(fn ($sensor) => $sensor->effectiveStatus());
+
+        if ($statuses->contains('disconnected')) return 'disconnected';
+        if ($statuses->contains('inactive')) return 'inactive';
+
+        return $statuses->isNotEmpty() ? 'active' : 'disconnected';
     }
 }

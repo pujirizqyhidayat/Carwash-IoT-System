@@ -113,6 +113,10 @@ class IoTController extends Controller
             'device_event_id' => $data['device_event_id'],
         ]);
 
+        $sensor->update([
+            'last_seen_at' => now(),
+        ]);
+
         SensorRawLog::create([
             'sensor_id' => $sensor->id,
             'distance_value' => $data['raw_distance'],

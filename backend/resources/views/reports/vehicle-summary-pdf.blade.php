@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>Vehicle Count Report</title>
+    <title>{{ $reportTitle }}</title>
     <style>
         body { font-family: DejaVu Sans, sans-serif; color: #111827; font-size: 12px; }
         h1 { font-size: 20px; margin: 0 0 4px; }
@@ -15,13 +15,8 @@
     </style>
 </head>
 <body>
-    <h1>Vehicle Count Report</h1>
-    <div class="meta">
-        Period:
-        {{ $startDate ?: 'Beginning' }}
-        to
-        {{ $endDate ?: 'Latest' }}
-    </div>
+    <h1>{{ $reportTitle }}</h1>
+    <div class="meta">{{ $locationName }} Reports</div>
 
     @if ($summaries->isEmpty())
         <div class="empty">No data available</div>
@@ -29,19 +24,21 @@
         <table>
             <thead>
                 <tr>
-                    <th>Date</th>
+                    <th>Period</th>
                     <th>Location</th>
-                    <th class="right">Total Vehicle</th>
-                    <th>Generated At</th>
+                    <th class="right">Vehicle Entry (In Days)</th>
+                    <th class="right">Total Transactions</th>
+                    <th class="right">Total Revenue</th>
                 </tr>
             </thead>
             <tbody>
                 @foreach ($summaries as $summary)
                     <tr>
-                        <td>{{ $summary->summary_date?->toDateString() }}</td>
+                        <td>{{ $summary->summary_date?->format('j-n-Y') }}</td>
                         <td>{{ $summary->location?->location_name }}</td>
                         <td class="right">{{ $summary->total_vehicle }}</td>
-                        <td>{{ $summary->generated_at?->toDateTimeString() }}</td>
+                        <td class="right">{{ $summary->total_transactions }}</td>
+                        <td class="right">Rp {{ number_format($summary->total_revenue, 0, ',', '.') }}</td>
                     </tr>
                 @endforeach
             </tbody>

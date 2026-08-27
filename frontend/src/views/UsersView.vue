@@ -8,7 +8,7 @@
             <p class="muted">Create, edit, and deactivate dashboard accounts</p>
           </div>
           <div class="flex items-center gap-2">
-            <button class="btn-primary" type="button" @click="addOpen = true">
+            <button class="btn-primary" type="button" @click="openAdd">
               <UserPlus :size="17" />
               Add User
             </button>
@@ -19,13 +19,14 @@
           </div>
         </div>
         <div class="overflow-x-auto">
-          <table class="w-full min-w-[820px]">
+          <table class="w-full min-w-[920px]">
             <thead class="table-head">
               <tr>
                 <th class="px-4 py-3">Name</th>
                 <th class="px-4 py-3">Username</th>
                 <th class="px-4 py-3">Email</th>
                 <th class="px-4 py-3">Role</th>
+                <th class="px-4 py-3">Location</th>
                 <th class="px-4 py-3">Status</th>
                 <th class="px-4 py-3"></th>
               </tr>
@@ -36,6 +37,7 @@
                 <td class="table-cell">{{ user.username }}</td>
                 <td class="table-cell">{{ user.email }}</td>
                 <td class="table-cell capitalize">{{ user.role }}</td>
+                <td class="table-cell">{{ user.assigned_location_name || 'All location' }}</td>
                 <td class="table-cell capitalize">{{ user.status }}</td>
                 <td class="table-cell text-right">
                   <button class="btn-outline mr-2" type="button" @click="openEdit(user)">
@@ -70,15 +72,24 @@
         </div>
         <div>
           <label class="label">Role</label>
-          <select v-model="form.role" class="input">
+          <select v-model="form.role" class="input" @change="syncAddLocation">
             <option value="owner">Owner</option>
             <option value="cashier">Cashier</option>
             <option value="admin">Admin</option>
           </select>
         </div>
-        <div class="md:col-span-2">
+        <div>
+          <label class="label">Location</label>
+          <select v-model="form.location_id" class="input" :disabled="form.role !== 'cashier'">
+            <option value="">All location</option>
+            <option v-for="location in locations" :key="location.id" :value="location.id">
+              {{ location.location_name }}
+            </option>
+          </select>
+        </div>
+        <div>
           <label class="label">Password</label>
-          <input v-model="form.password" class="input" type="password" />
+          <input v-model="form.password" class="input" type="password" autocomplete="new-password" />
         </div>
       </div>
       <div class="mt-5 flex justify-end gap-2">
@@ -90,7 +101,7 @@
       </div>
     </AppModal>
 
-    <AppModal :open="editOpen" title="Edit User" description="Update account role and status." @close="editOpen = false">
+    <AppModal :open="editOpen" title="Edit User" description="Update account role, location, and status." @close="editOpen = false">
       <div class="grid gap-4 md:grid-cols-2">
         <div>
           <label class="label">Full Name</label>
@@ -98,10 +109,19 @@
         </div>
         <div>
           <label class="label">Role</label>
-          <select v-model="editForm.role" class="input">
+          <select v-model="editForm.role" class="input" @change="syncEditLocation">
             <option value="owner">Owner</option>
             <option value="cashier">Cashier</option>
             <option value="admin">Admin</option>
+          </select>
+        </div>
+        <div>
+          <label class="label">Location</label>
+          <select v-model="editForm.location_id" class="input" :disabled="editForm.role !== 'cashier'">
+            <option value="">All location</option>
+            <option v-for="location in locations" :key="location.id" :value="location.id">
+              {{ location.location_name }}
+            </option>
           </select>
         </div>
         <div>
@@ -111,9 +131,9 @@
             <option value="inactive">Inactive</option>
           </select>
         </div>
-        <div>
+        <div class="md:col-span-2">
           <label class="label">New Password</label>
-          <input v-model="newPassword" class="input" type="password" placeholder="Leave blank to keep current" />
+          <input v-model="newPassword" class="input" type="password" autocomplete="new-password" placeholder="Leave blank to keep current" />
         </div>
       </div>
       <div class="mt-5 flex justify-end gap-2">
@@ -134,6 +154,7 @@ import MainLayout from '../layouts/mainlayout.vue'
 import { api, extractError } from '../services/api'
 
 const users = ref([])
+const locations = ref([])
 const addOpen = ref(false)
 const editOpen = ref(false)
 const editId = ref(null)
@@ -143,12 +164,14 @@ const form = reactive({
   full_name: '',
   username: '',
   email: '',
-  password: 'password123',
+  password: '',
   role: 'cashier',
+  location_id: '',
 })
 const editForm = reactive({
   full_name: '',
   role: 'cashier',
+  location_id: '',
   status: 'active',
 })
 
@@ -157,10 +180,54 @@ async function fetchUsers() {
   users.value = data
 }
 
+async function fetchLocations() {
+  const { data } = await api.get('/locations')
+  locations.value = data
+  syncAddLocation()
+}
+
+function firstLocationId() {
+  return locations.value[0]?.id ? String(locations.value[0].id) : ''
+}
+
+function normalizeUserPayload(payload) {
+  return {
+    ...payload,
+    location_id: payload.role === 'cashier' ? payload.location_id || null : null,
+  }
+}
+
+function syncAddLocation() {
+  if (form.role !== 'cashier') {
+    form.location_id = ''
+    return
+  }
+
+  if (!form.location_id) {
+    form.location_id = firstLocationId()
+  }
+}
+
+function syncEditLocation() {
+  if (editForm.role !== 'cashier') {
+    editForm.location_id = ''
+    return
+  }
+
+  if (!editForm.location_id) {
+    editForm.location_id = firstLocationId()
+  }
+}
+
+function openAdd() {
+  syncAddLocation()
+  addOpen.value = true
+}
+
 async function createUser() {
   try {
-    await api.post('/users', form)
-    Object.assign(form, { full_name: '', username: '', email: '', password: 'password123', role: 'cashier' })
+    await api.post('/users', normalizeUserPayload(form))
+    Object.assign(form, { full_name: '', username: '', email: '', password: '', role: 'cashier', location_id: firstLocationId() })
     addOpen.value = false
     await fetchUsers()
     showToast('User created')
@@ -175,14 +242,16 @@ function openEdit(user) {
   Object.assign(editForm, {
     full_name: user.full_name,
     role: user.role,
+    location_id: user.location_id ? String(user.location_id) : '',
     status: user.status,
   })
+  syncEditLocation()
   editOpen.value = true
 }
 
 async function saveEdit() {
   try {
-    await api.put(`/users/${editId.value}`, editForm)
+    await api.put(`/users/${editId.value}`, normalizeUserPayload(editForm))
     if (newPassword.value) {
       await api.post(`/users/${editId.value}/reset-password`, { new_password: newPassword.value })
     }
@@ -208,5 +277,8 @@ function showToast(message, type = 'success') {
   }, 2600)
 }
 
-onMounted(fetchUsers)
+onMounted(async () => {
+  await fetchLocations()
+  await fetchUsers()
+})
 </script>

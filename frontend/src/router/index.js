@@ -5,6 +5,7 @@ import DashboardView from '../views/DashboardView.vue'
 import LocationsView from '../views/LocationsView.vue'
 import LoginView from '../views/LoginView.vue'
 import MonitoringView from '../views/MonitoringView.vue'
+import ProfileView from '../views/ProfileView.vue'
 import ReportsView from '../views/ReportsView.vue'
 import SensorsView from '../views/SensorsView.vue'
 import UsersView from '../views/UsersView.vue'
@@ -59,6 +60,12 @@ const router = createRouter({
       meta: { roles: ['owner', 'admin'] },
     },
     {
+      path: '/profile',
+      name: 'profile',
+      component: ProfileView,
+      meta: { roles: ['owner', 'cashier', 'admin'] },
+    },
+    {
       path: '/audit-logs',
       name: 'audit-logs',
       component: AuditLogsView,
@@ -86,3 +93,6 @@ router.beforeEach((to) => {
 })
 
 export default router
+
+
+

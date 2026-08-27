@@ -2,18 +2,18 @@
   <div class="app-shell workspace-shell min-h-screen text-blue-50">
     <aside class="sidebar-panel fixed bottom-4 left-4 top-4 z-30 hidden w-72 overflow-hidden rounded-lg border border-white/10 text-white lg:flex lg:flex-col">
       <div class="px-5 pb-5 pt-6">
-        <div class="flex items-center gap-3 rounded-lg border border-white/10 bg-white/[0.08] px-4 py-3 backdrop-blur">
+        <div class="flex items-center gap-3 rounded-lg border border-white/10 bg-white/8 px-4 py-3 backdrop-blur">
           <div class="grid h-11 w-11 place-items-center rounded-md border border-cyan-300/20 bg-cyan-400/10 text-cyan-100 shadow-lg shadow-cyan-500/20">
             <Car :size="22" />
           </div>
           <div>
-            <p class="text-sm font-bold text-white">Carwash IoT</p>
-            <p class="text-xs text-blue-100/70">Vehicle Counter</p>
+            <p class="text-sm font-bold text-white">Charcoal</p>
+            <p class="text-xs text-blue-100/70">Vehicle Analysis Monitoring Systemu</p>
           </div>
         </div>
       </div>
 
-      <div class="mx-5 mb-2 rounded-lg border border-white/10 bg-white/[0.06] px-4 py-3">
+      <div class="mx-5 mb-2 rounded-lg border border-white/10 bg-white/6 px-4 py-3">
         <div class="flex items-center justify-between">
           <div>
             <p class="text-xs text-blue-100/65">Current location</p>
@@ -39,7 +39,7 @@
       </nav>
 
       <div class="shrink-0 p-4">
-        <div class="mb-3 rounded-lg border border-white/10 bg-white/[0.06] p-3 backdrop-blur">
+        <div class="mb-3 rounded-lg border border-white/10 bg-white/6 p-3 backdrop-blur">
           <div class="flex items-center gap-3">
             <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-blue-500/25 text-sm font-bold text-white ring-1 ring-blue-300/25">
               {{ userInitials }}
@@ -50,8 +50,15 @@
             </div>
           </div>
         </div>
+        <RouterLink
+          to="/profile"
+          class="mb-3 inline-flex h-11 w-full items-center justify-center gap-2 rounded-lg border border-white/10 bg-white/8 px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-white/12"
+        >
+          <UserCircle :size="17" />
+          Profile
+        </RouterLink>
         <button
-          class="inline-flex h-11 w-full items-center justify-center gap-2 rounded-lg border border-red-200/40 bg-red-500/15 px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-white hover:text-red-600"
+          class="inline-flex h-11 w-full items-center justify-center gap-2 rounded-lg border border-red-200/40 bg-red-500/15 px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-red-500/25 hover:text-white"
           type="button"
           @click="logout"
         >
@@ -63,13 +70,13 @@
 
     <div class="lg:pl-80">
       <header class="sticky top-4 z-20 mx-4 mt-4 rounded-lg border border-white/10 bg-slate-950/55 shadow-2xl shadow-blue-950/50 backdrop-blur-xl sm:mx-6 lg:mx-8">
-        <div class="flex h-16 items-center justify-between gap-4 px-5 sm:px-6">
+        <div class="flex min-h-24 flex-col items-start justify-center gap-4 px-5 py-4 sm:min-h-24 sm:flex-row sm:items-center sm:justify-between sm:px-6 sm:py-5">
           <div class="min-w-0">
-            <p class="robot-copy text-xs font-medium uppercase text-cyan-200/70">{{ eyebrow }}</p>
-            <h1 class="truncate text-lg font-semibold text-white">{{ title }}</h1>
+            <p class="robot-copy text-[11px] font-semibold uppercase text-cyan-200/70">{{ eyebrow }}</p>
+            <h1 class="mt-1 truncate text-xl font-semibold leading-tight text-white sm:text-2xl">{{ title }}</h1>
           </div>
-          <div class="flex items-center gap-3">
-            <select v-if="locations.locations.length" class="input hidden w-56 sm:block" :value="locations.activeLocationId" @change="changeLocation">
+          <div class="flex w-full flex-wrap items-center gap-2 sm:w-auto sm:justify-end sm:gap-3">
+            <select v-if="locations.locations.length" class="input hidden h-11 w-60 text-sm sm:block" :value="locations.activeLocationId" @change="changeLocation">
               <option v-for="location in locations.locations" :key="location.id" :value="location.id">
                 {{ location.location_name }}
               </option>
@@ -97,6 +104,10 @@
               <span>{{ item.label }}</span>
             </RouterLink>
           </div>
+          <RouterLink to="/profile" class="mt-3 inline-flex h-11 w-full items-center justify-center gap-2 rounded-lg border border-white/10 bg-white/8 px-4 text-sm font-semibold text-white transition hover:bg-white/12" @click="mobileOpen = false">
+            <UserCircle :size="17" />
+            Profile
+          </RouterLink>
           <button class="mt-3 inline-flex h-11 w-full items-center justify-center gap-2 rounded-lg border border-red-300/20 bg-red-500/15 px-4 text-sm font-semibold text-red-100 transition hover:bg-red-500/25 hover:text-white" type="button" @click="logout">
             <LogOut :size="17" />
             Logout
@@ -104,7 +115,7 @@
         </div>
       </header>
 
-      <main class="px-4 py-6 sm:px-6 lg:px-8">
+      <main class="px-4 py-7 sm:px-6 lg:px-8">
         <slot />
       </main>
     </div>
@@ -124,15 +135,16 @@ import {
   Radar,
   Users,
 } from '@lucide/vue'
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { RouterLink, useRouter } from 'vue-router'
+import { api } from '../services/api'
 import { useAuthStore } from '../stores/auth'
 import { useLocationStore } from '../stores/location'
 
 const props = defineProps({
   title: { type: String, required: true },
   eyebrow: { type: String, default: 'Operations' },
-  sensorStatus: { type: String, default: 'active' },
+  sensorStatus: { type: String, default: null },
 })
 
 defineOptions({
@@ -143,6 +155,8 @@ const router = useRouter()
 const auth = useAuthStore()
 const locations = useLocationStore()
 const mobileOpen = ref(false)
+const headerSensorStatus = ref('disconnected')
+let sensorTimer = null
 
 const navItems = [
   { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, roles: ['owner', 'cashier', 'admin'] },
@@ -165,20 +179,20 @@ const userInitials = computed(() => {
     .join('')
     .toUpperCase()
 })
+const currentSensorStatus = computed(() => props.sensorStatus || headerSensorStatus.value || 'disconnected')
 const sensorLabel = computed(() => {
-  const status = props.sensorStatus || 'disconnected'
-  if (status === 'disconnected') return 'Sensor Disconnected'
-  if (status === 'inactive') return 'Sensor Inactive'
+  if (currentSensorStatus.value === 'disconnected') return 'Sensor Disconnected'
+  if (currentSensorStatus.value === 'inactive') return 'Sensor Inactive'
   return 'Sensor Active'
 })
 const sensorClass = computed(() => {
-  if (props.sensorStatus === 'disconnected') return 'border-red-200 bg-red-50 text-red-700'
-  if (props.sensorStatus === 'inactive') return 'border-amber-200 bg-amber-50 text-amber-700'
+  if (currentSensorStatus.value === 'disconnected') return 'border-red-200 bg-red-50 text-red-700'
+  if (currentSensorStatus.value === 'inactive') return 'border-amber-200 bg-amber-50 text-amber-700'
   return 'border-emerald-200 bg-emerald-50 text-emerald-700'
 })
 const sensorDotClass = computed(() => {
-  if (props.sensorStatus === 'disconnected') return 'bg-red-500'
-  if (props.sensorStatus === 'inactive') return 'bg-amber-500'
+  if (currentSensorStatus.value === 'disconnected') return 'bg-red-500'
+  if (currentSensorStatus.value === 'inactive') return 'bg-amber-500'
   return 'bg-emerald-500'
 })
 
@@ -192,8 +206,43 @@ function changeLocation(event) {
   window.dispatchEvent(new CustomEvent('active-location-changed'))
 }
 
+async function refreshHeaderSensorStatus() {
+  if (props.sensorStatus) return
+
+  try {
+    const { data } = await api.get('/dashboard/summary', {
+      params: { location_id: locations.activeLocationId },
+    })
+    headerSensorStatus.value = data.sensor_status || 'disconnected'
+  } catch {
+    headerSensorStatus.value = 'disconnected'
+  }
+}
+
+function handleActiveLocationChanged() {
+  refreshHeaderSensorStatus()
+}
+
 onMounted(() => {
   locations.fetchLocations().catch(() => {})
+  refreshHeaderSensorStatus()
+  window.addEventListener('active-location-changed', handleActiveLocationChanged)
+  sensorTimer = window.setInterval(refreshHeaderSensorStatus, 15000)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('active-location-changed', handleActiveLocationChanged)
+  if (sensorTimer) window.clearInterval(sensorTimer)
 })
 </script>
+
+
+
+
+
+
+
+
+
+
 

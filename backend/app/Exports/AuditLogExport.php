@@ -13,7 +13,7 @@ class AuditLogExport implements FromCollection, WithHeadings, WithMapping, Shoul
 {
     public function __construct(
         private readonly ?string $module,
-        private readonly ?string $action,
+        private readonly ?string $userId,
         private readonly ?string $startDate,
         private readonly ?string $endDate
     ) {
@@ -23,7 +23,11 @@ class AuditLogExport implements FromCollection, WithHeadings, WithMapping, Shoul
     {
         return AuditLog::with('user')
             ->when($this->module, fn ($query) => $query->where('module', $this->module))
-            ->when($this->action, fn ($query) => $query->where('action', $this->action))
+            ->when($this->userId, function ($query) {
+                return $this->userId === 'system'
+                    ? $query->whereNull('user_id')
+                    : $query->where('user_id', $this->userId);
+            })
             ->when($this->startDate, fn ($query) => $query->where('created_at', '>=', $this->startDate))
             ->when($this->endDate, fn ($query) => $query->where('created_at', '<=', $this->endDate))
             ->orderBy('created_at')
@@ -46,7 +50,7 @@ class AuditLogExport implements FromCollection, WithHeadings, WithMapping, Shoul
     public function map($log): array
     {
         return [
-            $log->created_at?->toDateTimeString(),
+            $log->created_at?->copy()->timezone('Asia/Jakarta')->format('Y-m-d | H:i'),
             $log->user?->username ?? 'system',
             $log->action,
             $log->module,
@@ -56,3 +60,4 @@ class AuditLogExport implements FromCollection, WithHeadings, WithMapping, Shoul
         ];
     }
 }
+

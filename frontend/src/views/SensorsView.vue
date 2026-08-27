@@ -47,10 +47,6 @@
                     <Pencil :size="16" />
                     Edit
                   </button>
-                  <button class="btn-outline" type="button" @click="deactivate(sensor.id)">
-                    <PowerOff :size="16" />
-                    Deactivate
-                  </button>
                 </td>
               </tr>
             </tbody>
@@ -107,10 +103,6 @@
             <option value="disconnected">disconnected</option>
           </select>
         </div>
-        <div>
-          <label class="label">Threshold</label>
-          <input v-model="editForm.threshold_distance" class="input" type="number" />
-        </div>
       </div>
       <div class="mt-5 flex justify-end gap-2">
         <button class="btn-outline" type="button" @click="editOpen = false">Cancel</button>
@@ -122,7 +114,7 @@
 </template>
 
 <script setup>
-import { Pencil, Plus, PowerOff, RefreshCw } from '@lucide/vue'
+import { Pencil, Plus, RefreshCw } from '@lucide/vue'
 import { computed, onMounted, onUnmounted, reactive, ref } from 'vue'
 import AppModal from '../components/AppModal.vue'
 import AppToast from '../components/AppToast.vue'
@@ -148,7 +140,6 @@ const editForm = reactive({
   sensor_name: '',
   sensor_position: 'entry',
   status: 'active',
-  threshold_distance: 40,
 })
 
 const overallStatus = computed(() => sensors.value.find((item) => item.status === 'disconnected')?.status || sensors.value[0]?.status || 'disconnected')
@@ -193,29 +184,19 @@ function openEdit(sensor) {
     sensor_name: sensor.sensor_name,
     sensor_position: sensor.sensor_position,
     status: sensor.status,
-    threshold_distance: sensor.threshold_distance || 0,
   })
   editOpen.value = true
 }
 
 async function saveEdit() {
   try {
-    await api.put(`/sensors/${editId.value}`, {
-      ...editForm,
-      threshold_distance: Number(editForm.threshold_distance),
-    })
+    await api.put(`/sensors/${editId.value}`, editForm)
     editOpen.value = false
     await fetchSensors()
     showToast('Sensor updated')
   } catch (error) {
     showToast(extractError(error, 'Failed to update sensor'), 'error')
   }
-}
-
-async function deactivate(id) {
-  await api.delete(`/sensors/${id}`)
-  await fetchSensors()
-  showToast('Sensor deactivated')
 }
 
 function showToast(message, type = 'success') {

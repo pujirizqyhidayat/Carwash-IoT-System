@@ -28,6 +28,7 @@ use App\Http\Controllers\Api\V1\AuditLogController;
 Route::prefix('v1')->group(function () {
     Route::prefix('auth')->group(function () {
         Route::post('login', [AuthController::class, 'login']);
+        Route::post('forgot-password', [AuthController::class, 'forgotPassword']);
     });
 
     Route::prefix('iot')->middleware('device.key')->group(function () {
@@ -39,17 +40,21 @@ Route::prefix('v1')->group(function () {
         Route::prefix('auth')->group(function () {
             Route::post('logout', [AuthController::class, 'logout']);
             Route::get('me', [AuthController::class, 'me']);
+            Route::post('change-password', [AuthController::class, 'changePassword']);
         });
 
         Route::prefix('dashboard')->group(function () {
             Route::get('summary', [DashboardController::class, 'summary']);
             Route::get('recent-activities', [DashboardController::class, 'recentActivities']);
-            Route::get('chart', [DashboardController::class, 'chart'])->middleware('role:owner,admin');
+            Route::get('chart', [DashboardController::class, 'chart']);
         });
 
         Route::prefix('monitoring')->group(function () {
             Route::get('today', [MonitoringController::class, 'today']);
             Route::get('hourly', [MonitoringController::class, 'hourly']);
+            Route::get('services', [MonitoringController::class, 'services']);
+            Route::get('entries', [MonitoringController::class, 'entries']);
+            Route::post('entries/{vehicleEntry}/transaction', [MonitoringController::class, 'storeTransaction'])->middleware('role:cashier,admin');
         });
 
         Route::apiResource('sensors', SensorController::class)->only(['index', 'show'])->middleware('role:owner,admin');
@@ -59,7 +64,7 @@ Route::prefix('v1')->group(function () {
         Route::apiResource('users', UserController::class)->middleware('role:admin');
         Route::post('users/{id}/reset-password', [UserController::class, 'resetPassword'])->middleware('role:admin');
 
-        Route::apiResource('locations', LocationController::class)->only(['index', 'show'])->middleware('role:owner,admin');
+        Route::apiResource('locations', LocationController::class)->only(['index', 'show'])->middleware('role:owner,cashier,admin');
         Route::apiResource('locations', LocationController::class)->only(['store', 'update', 'destroy'])->middleware('role:admin');
 
         Route::apiResource('vehicle-entries', VehicleEntryController::class)->only(['index', 'show'])->middleware('role:owner,admin');

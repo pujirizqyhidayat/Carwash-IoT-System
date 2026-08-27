@@ -6,6 +6,7 @@ namespace Database\Seeders;
 use App\Models\ParkingLocation;
 use App\Models\UltrasonicSensor;
 use App\Models\User;
+use App\Models\WashService;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 
@@ -23,6 +24,7 @@ class DatabaseSeeder extends Seeder
                 'username' => 'admin',
                 'password' => Hash::make('password123'),
                 'role' => 'admin',
+                'location_id' => null,
                 'status' => 'active',
             ]
         );
@@ -34,7 +36,17 @@ class DatabaseSeeder extends Seeder
                 'username' => 'owner',
                 'password' => Hash::make('password123'),
                 'role' => 'owner',
+                'location_id' => null,
                 'status' => 'active',
+            ]
+        );
+
+        $location = ParkingLocation::updateOrCreate(
+            ['location_name' => 'R Moda Car Wash'],
+            [
+                'owner_id' => $owner->id,
+                'address' => 'Jl. Sudirman No. 15',
+                'capacity' => 20,
             ]
         );
 
@@ -45,19 +57,22 @@ class DatabaseSeeder extends Seeder
                 'username' => 'cashier',
                 'password' => Hash::make('password123'),
                 'role' => 'cashier',
+                'location_id' => $location->id,
                 'status' => 'active',
             ]
         );
 
-        $location = ParkingLocation::updateOrCreate(
-            ['location_name' => 'Rizki Car Wash'],
-            [
-                'owner_id' => $owner->id,
-                'address' => 'Jl. Sudirman No. 15',
-                'capacity' => 20,
-            ]
-        );
 
+        foreach ([
+            ['service_name' => 'Cuci Biasa', 'price' => 30000],
+            ['service_name' => 'Cuci Total', 'price' => 50000],
+            ['service_name' => 'Cuci + Vacuum', 'price' => 40000],
+        ] as $service) {
+            WashService::updateOrCreate(
+                ['service_name' => $service['service_name']],
+                ['price' => $service['price'], 'is_active' => true]
+            );
+        }
         UltrasonicSensor::updateOrCreate(
             ['sensor_code' => 'ENTRANCE-001'],
             [

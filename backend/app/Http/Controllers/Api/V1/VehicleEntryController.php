@@ -11,7 +11,7 @@ class VehicleEntryController extends Controller
 {
     public function index(Request $request)
     {
-        $locationId = $request->query('location_id');
+        $locationId = $request->user()?->assigned_location_id ?? $request->query('location_id');
         $date = $request->query('date');
         $q = VehicleEntry::query();
         if ($locationId) $q->where('location_id', $locationId);
