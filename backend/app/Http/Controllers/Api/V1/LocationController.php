@@ -9,8 +9,14 @@ use App\Models\AuditLog;
 
 class LocationController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
+        $assignedLocationId = $request->user()?->assigned_location_id;
+
+        if ($assignedLocationId) {
+            return response()->json(ParkingLocation::where('id', $assignedLocationId)->get());
+        }
+
         return response()->json(ParkingLocation::all());
     }
 
@@ -62,8 +68,14 @@ class LocationController extends Controller
         return response()->json($loc);
     }
 
-    public function show($id)
+    public function show(Request $request, $id)
     {
+        $assignedLocationId = $request->user()?->assigned_location_id;
+
+        if ($assignedLocationId && (int) $id !== (int) $assignedLocationId) {
+            return response()->json(['message' => 'Forbidden location'], 403);
+        }
+
         return response()->json(ParkingLocation::findOrFail($id));
     }
 
@@ -86,3 +98,4 @@ class LocationController extends Controller
         return response()->json(['message' => 'Location deleted']);
     }
 }
+

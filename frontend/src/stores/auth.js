@@ -35,6 +35,24 @@ export const useAuthStore = defineStore('auth', {
         this.loading = false
       }
     },
+    async forgotPassword(payload) {
+      this.loading = true
+      try {
+        const { data } = await api.post('/auth/forgot-password', payload)
+        return data
+      } finally {
+        this.loading = false
+      }
+    },
+    async changePassword(payload) {
+      this.loading = true
+      try {
+        const { data } = await api.post('/auth/change-password', payload)
+        return data
+      } finally {
+        this.loading = false
+      }
+    },
     async fetchMe() {
       if (!this.token) return null
       const { data } = await api.get('/auth/me')
@@ -57,3 +75,4 @@ export const useAuthStore = defineStore('auth', {
     },
   },
 })
+

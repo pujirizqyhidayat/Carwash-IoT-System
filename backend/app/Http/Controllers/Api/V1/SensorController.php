@@ -14,7 +14,7 @@ class SensorController extends Controller
         $locationId = $request->query('location_id');
         $q = UltrasonicSensor::query();
         if ($locationId) $q->where('location_id', $locationId);
-        return response()->json($q->get());
+        return response()->json($q->get()->map(fn ($sensor) => $this->serializeSensor($sensor)));
     }
 
     public function store(Request $request)
@@ -40,7 +40,7 @@ class SensorController extends Controller
             'metadata' => ['sensor_id' => $sensor->id],
         ]);
 
-        return response()->json($sensor, 201);
+        return response()->json($this->serializeSensor($sensor), 201);
     }
 
     public function update(Request $request, $id)
@@ -65,12 +65,12 @@ class SensorController extends Controller
             'metadata' => ['sensor_id' => $sensor->id, 'changes' => array_keys($data)],
         ]);
 
-        return response()->json($sensor);
+        return response()->json($this->serializeSensor($sensor));
     }
 
     public function show($id)
     {
-        return response()->json(UltrasonicSensor::findOrFail($id));
+        return response()->json($this->serializeSensor(UltrasonicSensor::findOrFail($id)));
     }
 
     public function status($id)
@@ -79,7 +79,7 @@ class SensorController extends Controller
         return response()->json([
             'sensor_id' => $sensor->id,
             'sensor_name' => $sensor->sensor_name,
-            'status' => $sensor->status,
+            'status' => $sensor->effectiveStatus(),
             'last_seen_at' => $sensor->last_seen_at?->toDateTimeString(),
         ]);
     }
@@ -102,4 +102,22 @@ class SensorController extends Controller
 
         return response()->json(['message' => 'Sensor deactivated']);
     }
+
+    private function serializeSensor(UltrasonicSensor $sensor): array
+    {
+        return [
+            'id' => $sensor->id,
+            'location_id' => $sensor->location_id,
+            'sensor_name' => $sensor->sensor_name,
+            'sensor_code' => $sensor->sensor_code,
+            'sensor_position' => $sensor->sensor_position,
+            'status' => $sensor->effectiveStatus(),
+            'threshold_distance' => $sensor->threshold_distance,
+            'installed_at' => $sensor->installed_at?->toDateTimeString(),
+            'last_seen_at' => $sensor->last_seen_at?->toDateTimeString(),
+            'created_at' => $sensor->created_at?->toDateTimeString(),
+            'updated_at' => $sensor->updated_at?->toDateTimeString(),
+        ];
+    }
 }
+

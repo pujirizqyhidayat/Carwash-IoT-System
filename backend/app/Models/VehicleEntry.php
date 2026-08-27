@@ -39,4 +39,9 @@ class VehicleEntry extends Model
     {
         return $this->belongsTo(UltrasonicSensor::class, 'sensor_id');
     }
+
+    public function transaction()
+    {
+        return $this->hasOne(CarwashTransaction::class);
+    }
 }

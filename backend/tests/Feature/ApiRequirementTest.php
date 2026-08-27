@@ -8,6 +8,7 @@ use App\Models\UltrasonicSensor;
 use App\Models\User;
 use App\Models\VehicleCountSummary;
 use App\Models\VehicleEntry;
+use App\Models\WashService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 use Laravel\Sanctum\Sanctum;
@@ -89,6 +90,57 @@ class ApiRequirementTest extends TestCase
             'module' => 'authorization',
             'status' => 'failed',
         ]);
+    }
+
+    public function test_cashier_can_record_vehicle_transaction_but_not_access_reports(): void
+    {
+        $sensor = $this->createActiveSensor();
+        $service = WashService::create([
+            'service_name' => 'Cuci Total',
+            'price' => 50000,
+            'is_active' => true,
+        ]);
+        $cashier = User::factory()->create([
+            'role' => 'cashier',
+            'location_id' => $sensor->location_id,
+        ]);
+        Sanctum::actingAs($cashier);
+
+        $entry = VehicleEntry::create([
+            'location_id' => $sensor->location_id,
+            'sensor_id' => $sensor->id,
+            'entry_time' => now(),
+            'vehicle_count' => 1,
+            'device_event_id' => 'CASHIER-MONITORING-001',
+        ]);
+
+        $this->getJson("/api/v1/monitoring/today?location_id={$sensor->location_id}")
+            ->assertOk()
+            ->assertJsonPath('vehicles_today', 1)
+            ->assertJsonPath('transactions_today', 0)
+            ->assertJsonPath('pending_transactions', 1)
+            ->assertJsonPath('total_revenue', 0);
+
+        $this->postJson("/api/v1/monitoring/entries/{$entry->id}/transaction", [
+            'wash_service_id' => $service->id,
+            'price' => 999999,
+            'payment_status' => 'paid',
+        ])
+            ->assertOk()
+            ->assertJsonPath('message', 'Transaction saved')
+            ->assertJsonPath('transaction.service_name', 'Cuci Total')
+            ->assertJsonPath('transaction.price', 50000);
+
+        $this->getJson("/api/v1/monitoring/today?location_id={$sensor->location_id}")
+            ->assertOk()
+            ->assertJsonPath('vehicles_today', 1)
+            ->assertJsonPath('transactions_today', 1)
+            ->assertJsonPath('pending_transactions', 0)
+            ->assertJsonPath('total_revenue', 50000);
+
+        $this->getJson("/api/v1/reports?location_id={$sensor->location_id}")
+            ->assertForbidden()
+            ->assertJsonPath('message', 'Access denied');
     }
 
     public function test_iot_detection_requires_device_key_and_stores_valid_detection(): void
@@ -175,11 +227,12 @@ class ApiRequirementTest extends TestCase
     public function test_owner_can_export_report_and_admin_can_export_audit_logs(): void
     {
         $sensor = $this->createActiveSensor();
-        VehicleCountSummary::create([
+        VehicleEntry::create([
             'location_id' => $sensor->location_id,
-            'summary_date' => now()->toDateString(),
-            'total_vehicle' => 5,
-            'generated_at' => now(),
+            'sensor_id' => $sensor->id,
+            'entry_time' => now(),
+            'vehicle_count' => 5,
+            'device_event_id' => 'REPORT-EXPORT-001',
         ]);
 
         Sanctum::actingAs(User::factory()->owner()->create());
@@ -203,6 +256,57 @@ class ApiRequirementTest extends TestCase
         $this->getJson('/api/v1/audit-logs/export')
             ->assertOk()
             ->assertHeader('content-type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    }
+
+    public function test_reports_are_aggregated_from_actual_vehicle_entries(): void
+    {
+        Sanctum::actingAs(User::factory()->owner()->create());
+        $sensor = $this->createActiveSensor();
+
+        VehicleCountSummary::create([
+            'location_id' => $sensor->location_id,
+            'summary_date' => now()->toDateString(),
+            'total_vehicle' => 99,
+            'generated_at' => now(),
+        ]);
+
+        $service = WashService::create([
+            'service_name' => 'Cuci Biasa',
+            'price' => 30000,
+            'is_active' => true,
+        ]);
+
+        $firstEntry = VehicleEntry::create([
+            'location_id' => $sensor->location_id,
+            'sensor_id' => $sensor->id,
+            'entry_time' => now(),
+            'vehicle_count' => 2,
+            'device_event_id' => 'REPORT-ACTUAL-001',
+        ]);
+        VehicleEntry::create([
+            'location_id' => $sensor->location_id,
+            'sensor_id' => $sensor->id,
+            'entry_time' => now(),
+            'vehicle_count' => 3,
+            'device_event_id' => 'REPORT-ACTUAL-002',
+        ]);
+
+        Sanctum::actingAs(User::factory()->admin()->create());
+
+        $this->postJson("/api/v1/monitoring/entries/{$firstEntry->id}/transaction", [
+            'wash_service_id' => $service->id,
+            'price' => 999999,
+            'payment_status' => 'paid',
+        ])->assertOk();
+
+        $today = now()->toDateString();
+
+        $this->getJson("/api/v1/reports?location_id={$sensor->location_id}&start_date={$today}&end_date={$today}")
+            ->assertOk()
+            ->assertJsonCount(1)
+            ->assertJsonPath('0.total_vehicle', 5)
+            ->assertJsonPath('0.total_transactions', 1)
+            ->assertJsonPath('0.total_revenue', 30000);
     }
 
     private function createActiveSensor(float $thresholdDistance = 40): UltrasonicSensor

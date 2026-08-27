@@ -7,12 +7,13 @@ use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\AuditLog;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rule;
 
 class UserController extends Controller
 {
     public function index()
     {
-        return response()->json(User::all());
+        return response()->json(User::with('assignedLocation')->get());
     }
 
     public function store(Request $request)
@@ -23,7 +24,17 @@ class UserController extends Controller
             'email' => 'required|email|unique:users,email',
             'password' => 'required|string|min:6',
             'role' => 'required|in:owner,cashier,admin',
+            'location_id' => [
+                Rule::requiredIf($request->input('role') === 'cashier'),
+                'nullable',
+                'integer',
+                'exists:parking_locations,id',
+            ],
         ]);
+
+        if (($data['role'] ?? null) !== 'cashier') {
+            $data['location_id'] = null;
+        }
 
         $data['password'] = Hash::make($data['password']);
         $user = User::create($data);
@@ -36,20 +47,32 @@ class UserController extends Controller
             'ip_address' => $request->ip(),
             'user_agent' => $request->userAgent(),
             'status' => 'success',
-            'metadata' => ['target_user_id' => $user->id, 'role' => $user->role],
+            'metadata' => ['target_user_id' => $user->id, 'role' => $user->role, 'location_id' => $user->location_id],
         ]);
 
-        return response()->json($user, 201);
+        return response()->json($user->load('assignedLocation'), 201);
     }
 
     public function update(Request $request, $id)
     {
         $user = User::findOrFail($id);
+        $role = $request->input('role', $user->role);
         $data = $request->validate([
             'full_name' => 'sometimes|string',
             'role' => 'sometimes|in:owner,cashier,admin',
+            'location_id' => [
+                Rule::requiredIf($role === 'cashier'),
+                'nullable',
+                'integer',
+                'exists:parking_locations,id',
+            ],
             'status' => 'sometimes|in:active,inactive',
         ]);
+
+        if (($data['role'] ?? $user->role) !== 'cashier') {
+            $data['location_id'] = null;
+        }
+
         $user->update($data);
 
         AuditLog::create([
@@ -60,15 +83,15 @@ class UserController extends Controller
             'ip_address' => $request->ip(),
             'user_agent' => $request->userAgent(),
             'status' => 'success',
-            'metadata' => ['target_user_id' => $user->id, 'changes' => array_keys($data)],
+            'metadata' => ['target_user_id' => $user->id, 'changes' => array_keys($data), 'location_id' => $user->location_id],
         ]);
 
-        return response()->json($user);
+        return response()->json($user->load('assignedLocation'));
     }
 
     public function show($id)
     {
-        return response()->json(User::findOrFail($id));
+        return response()->json(User::with('assignedLocation')->findOrFail($id));
     }
 
     public function resetPassword(Request $request, $id)

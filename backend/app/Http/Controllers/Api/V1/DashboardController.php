@@ -3,50 +3,52 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use App\Models\UltrasonicSensor;
 use App\Models\VehicleEntry;
 use Carbon\Carbon;
+use Illuminate\Http\Request;
 
 class DashboardController extends Controller
 {
     public function summary(Request $request)
     {
-        $locationId = $request->query('location_id');
-
-        $today = now()->toDateString();
+        $locationId = $request->user()?->assigned_location_id ?? $request->query('location_id');
+        $now = now();
 
         $vehiclesToday = VehicleEntry::where('location_id', $locationId)
-            ->whereDate('entry_time', $today)
+            ->whereDate('entry_time', $now->toDateString())
             ->sum('vehicle_count');
 
-        $startOfWeek = now()->startOfWeek();
-        $startOfMonth = now()->startOfMonth();
-
         $vehiclesThisWeek = VehicleEntry::where('location_id', $locationId)
-            ->where('entry_time', '>=', $startOfWeek)
+            ->whereBetween('entry_time', [
+                $now->copy()->startOfWeek()->startOfDay(),
+                $now->copy()->endOfWeek()->endOfDay(),
+            ])
             ->sum('vehicle_count');
 
         $vehiclesThisMonth = VehicleEntry::where('location_id', $locationId)
-            ->where('entry_time', '>=', $startOfMonth)
+            ->whereBetween('entry_time', [
+                $now->copy()->startOfMonth()->startOfDay(),
+                $now->copy()->endOfMonth()->endOfDay(),
+            ])
             ->sum('vehicle_count');
 
-        $sensorStatus = UltrasonicSensor::where('location_id', $locationId)
-            ->orderByRaw("case status when 'disconnected' then 0 when 'inactive' then 1 else 2 end")
-            ->value('status') ?? 'disconnected';
+        $sensorStatus = UltrasonicSensor::aggregateStatus(
+            UltrasonicSensor::where('location_id', $locationId)->get()
+        );
 
         return response()->json([
             'vehicles_today' => $vehiclesToday,
             'vehicles_this_week' => $vehiclesThisWeek,
             'vehicles_this_month' => $vehiclesThisMonth,
             'sensor_status' => $sensorStatus,
-            'last_updated' => now()->toDateTimeString(),
+            'last_updated' => $now->toDateTimeString(),
         ]);
     }
 
     public function recentActivities(Request $request)
     {
-        $locationId = $request->query('location_id');
+        $locationId = $request->user()?->assigned_location_id ?? $request->query('location_id');
         $limit = intval($request->query('limit', 10));
 
         $items = VehicleEntry::where('location_id', $locationId)
@@ -67,7 +69,7 @@ class DashboardController extends Controller
 
     public function chart(Request $request)
     {
-        $locationId = $request->query('location_id');
+        $locationId = $request->user()?->assigned_location_id ?? $request->query('location_id');
         $period = $request->query('period', 'daily');
         $data = [];
 
@@ -82,30 +84,26 @@ class DashboardController extends Controller
                     ->sum('vehicle_count');
                 $data[] = ['label' => $hourLabel, 'value' => $count];
             }
+
+            return response()->json($data);
+        }
+
+        $labels = [];
+        if ($period === 'monthly') {
+            for ($day = 1; $day <= now()->daysInMonth; $day++) {
+                $labels[] = now()->copy()->startOfMonth()->addDays($day - 1)->toDateString();
+            }
         } else {
-            $rangeStart = now();
-            $labels = [];
-
-            if ($period === 'weekly') {
-                $rangeStart = now()->subDays(6);
-                for ($i = 0; $i < 7; $i++) {
-                    $labels[] = now()->subDays(6 - $i)->toDateString();
-                }
-            } elseif ($period === 'monthly') {
-                $labels = collect(range(1, now()->daysInMonth))->map(fn ($day) => now()->startOfMonth()->addDays($day - 1)->toDateString())->toArray();
-            } else {
-                $rangeStart = now()->subDays(6);
-                for ($i = 0; $i < 7; $i++) {
-                    $labels[] = now()->subDays(6 - $i)->toDateString();
-                }
+            for ($i = 0; $i < 7; $i++) {
+                $labels[] = now()->copy()->subDays(6 - $i)->toDateString();
             }
+        }
 
-            foreach ($labels as $label) {
-                $count = VehicleEntry::where('location_id', $locationId)
-                    ->whereDate('entry_time', $label)
-                    ->sum('vehicle_count');
-                $data[] = ['label' => $label, 'value' => $count];
-            }
+        foreach ($labels as $label) {
+            $count = VehicleEntry::where('location_id', $locationId)
+                ->whereDate('entry_time', $label)
+                ->sum('vehicle_count');
+            $data[] = ['label' => $label, 'value' => $count];
         }
 
         return response()->json($data);

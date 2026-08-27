@@ -62,6 +62,10 @@ class VehicleDetectionController extends Controller
             'device_event_id' => $validated['device_event_id'],
         ]);
 
+        $sensor->update([
+            'last_seen_at' => now(),
+        ]);
+
         // Log to audit log
         AuditLog::create([
             'user_id' => null,
